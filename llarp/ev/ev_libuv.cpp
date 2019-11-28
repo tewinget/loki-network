@@ -650,11 +650,14 @@ namespace libuv
     byte_t m_Buffer[1500];
     bool readpkt;
 
+    uint64_t last_tick;
+
     tun_glue(llarp_tun_io* tun) : m_Tun(tun), m_Device(tuntap_init())
     {
       m_Handle.data = this;
       m_Ticker.data = this;
       readpkt       = false;
+      last_tick = 0;
     }
 
     ~tun_glue() override
@@ -666,7 +669,7 @@ namespace libuv
     OnTick(uv_check_t* timer)
     {
       tun_glue* tun = static_cast< tun_glue* >(timer->data);
-      tun->Tick();
+      tun->Tick(uv_now(timer->loop));
     }
 
     static void
@@ -692,12 +695,16 @@ namespace libuv
     }
 
     void
-    Tick()
+    Tick(uint64_t time)
     {
-      if(m_Tun->before_write)
-        m_Tun->before_write(m_Tun);
-      if(m_Tun->tick)
-        m_Tun->tick(m_Tun);
+      if ((time - last_tick) > 2) // only tick at most every 2 ms
+      {
+        last_tick = time;
+        if(m_Tun->before_write)
+          m_Tun->before_write(m_Tun);
+        if(m_Tun->tick)
+          m_Tun->tick(m_Tun);
+      }
     }
 
     static void
@@ -791,6 +798,10 @@ namespace libuv
   {
     if(uv_loop_init(&m_Impl) == -1)
       return false;
+
+    last_time = 0;
+    loop_run_count = 0;
+
     m_Impl.data = this;
     uv_loop_configure(&m_Impl, UV_LOOP_BLOCK_SIGNAL, SIGPIPE);
     m_TickTimer.data = this;
@@ -834,6 +845,14 @@ namespace libuv
   {
     if(m_Run)
     {
+      if ((uv_now(&m_Impl) - last_time) > 1000)
+      {
+        llarp::LogWarn("UV EVENT LOOP TICKS LAST SECOND: ", loop_run_count);
+        loop_run_count = 0;
+        last_time = uv_now(&m_Impl);
+      }
+      loop_run_count++;
+
       uv_timer_start(&m_TickTimer, &OnTickTimeout, ms, 0);
       uv_run(&m_Impl, UV_RUN_ONCE);
     }
