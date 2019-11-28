@@ -77,8 +77,6 @@ namespace llarp
     METRIC("queue");
     auto f = [self = this, func, tag, line]() {
 #if defined(LOKINET_DEBUG)
-      if (self->m_Thread->pendingJobs() > 50)
-        LogWarnExplicit(TAG, LINE, " processing job.");
       metrics::TimerGuard g("logic",
                             std::string(TAG) + ":" + std::to_string(LINE));
 #endif
