@@ -293,6 +293,7 @@ add_subdirectory(crypto)
 add_subdirectory(llarp)
 add_subdirectory(libabyss)
 add_subdirectory(daemon)
+add_subdirectory(tooling)
 
 if(WITH_TESTS)
   enable_testing()
