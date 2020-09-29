@@ -505,32 +505,13 @@ namespace llarp
     BootstrapList b_list;
     for (const auto& router : configRouters)
     {
-      bool isListFile = false;
+      RouterContact rc;
+      if (not rc.Read(router))
       {
-        std::ifstream inf(router.c_str(), std::ios::binary);
-        if (inf.is_open())
-        {
-          const char ch = inf.get();
-          isListFile = ch == 'l';
-        }
+        throw std::runtime_error(
+            stringify("failed to decode bootstrap RC, file='", router, "' rc=", rc));
       }
-      if (isListFile)
-      {
-        if (not BDecodeReadFile(router, b_list))
-        {
-          throw std::runtime_error(stringify("failed to read bootstrap list file '", router, "'"));
-        }
-      }
-      else
-      {
-        RouterContact rc;
-        if (not rc.Read(router))
-        {
-          throw std::runtime_error(
-              stringify("failed to decode bootstrap RC, file='", router, "' rc=", rc));
-        }
-        b_list.insert(rc);
-      }
+      b_list.insert(rc);
     }
 
     for (auto& rc : b_list)
