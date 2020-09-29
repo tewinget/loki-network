@@ -72,6 +72,8 @@ namespace llarp
   /// RouterContact
   struct RouterContact
   {
+    static constexpr uint64_t CURRENT_RC_VERSION = 1;
+
     /// for unit tests
     static bool BlockBogons;
 
@@ -107,7 +109,7 @@ namespace llarp
     llarp::AlignedBuffer<NICKLEN> nickname;
 
     llarp_time_t last_updated = 0s;
-    uint64_t version = LLARP_PROTO_VERSION;
+    uint64_t version = CURRENT_RC_VERSION;
     std::optional<RouterVersion> routerVersion;
     /// should we serialize the exit info?
     const static bool serializeExit = true;
