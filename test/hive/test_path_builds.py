@@ -5,7 +5,7 @@ def test_path_builds(HiveArbitrary):
 
   start_time = time()
   cur_time = start_time
-  test_duration = 5 #seconds
+  test_duration = 20 #seconds
 
   log_attempts = True
 
@@ -51,8 +51,8 @@ def test_path_builds(HiveArbitrary):
     h.events = []
     cur_time = time()
 
-    # only collect path attempts for 3 seconds
-    if cur_time > start_time + 3:
+    # only collect path attempts for 5 seconds
+    if cur_time > start_time + 5:
       log_attempts = False
 
   assert len(paths) > 0
