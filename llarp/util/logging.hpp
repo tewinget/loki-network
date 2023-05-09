@@ -27,6 +27,7 @@ namespace llarp
 namespace llarp
 {
   inline std::shared_ptr<log::RingBufferSink> logRingBuffer = nullptr;
+  inline spdlog::sink_ptr setup_log_sink = nullptr;
 
   namespace log_detail
   {

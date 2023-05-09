@@ -155,6 +155,9 @@ namespace llarp::quic
     // The port the client wants to connect to on the server
     uint16_t tunnel_port = 0;
 
+    size_t stream_bytes = 0;
+    size_t total_bytes = 0;
+
    public:
     // The endpoint that owns this connection
     Endpoint& endpoint;

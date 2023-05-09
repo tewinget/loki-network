@@ -421,7 +421,13 @@ namespace llarp
 
     if (log::get_level_default() != log::Level::off)
       log::reset_level(conf.logging.m_logLevel);
-    // log::clear_sinks();
+    if (llarp::setup_log_sink)
+    {
+      log::flush();
+      log::master_sink->remove_sink(llarp::setup_log_sink);
+      llarp::setup_log_sink.reset();
+    }
+
     log::add_sink(log_type, log_type == log::Type::System ? "lokinet" : conf.logging.m_logFile);
 
     // re-add rpc log sink if rpc enabled, else free it

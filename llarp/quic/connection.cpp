@@ -659,6 +659,7 @@ namespace llarp::quic
     uint64_t ts = get_timestamp();
     send_pkt_info = {};
 
+    // returns 0 on success, nonzero on fail; currently error values are arbitrary/unused
     auto send_packet = [&](auto nwrite) -> int {
       send_buffer_size = nwrite;
       log::trace(logcat, "Sending {}B packet", send_buffer_size);
@@ -669,7 +670,7 @@ namespace llarp::quic
         log::debug(logcat, "Packet send blocked, scheduling retransmit");
         ngtcp2_conn_update_pkt_tx_time(conn.get(), ts);
         schedule_retransmit();
-        return 0;
+        return -1;
       }
 
       send_buffer_size = 0;
@@ -678,10 +679,12 @@ namespace llarp::quic
         log::warning(logcat, "I/O error while trying to send packet: {}", sent.str());
         // FIXME: disconnect?
         ngtcp2_conn_update_pkt_tx_time(conn.get(), ts);
-        return 0;
+        return -2;
       }
+      total_bytes += nwrite;
+      log::debug(logcat, "total written bytes: {}", total_bytes);
       log::debug(logcat, "packet away!");
-      return 1;
+      return 0;
     };
 
     std::list<Stream*> strs;
@@ -700,6 +703,7 @@ namespace llarp::quic
       }
     }
 
+    auto stream_bytes_before = stream_bytes;
     while (!strs.empty() && stream_packets < max_stream_packets)
     {
       for (auto it = strs.begin(); it != strs.end();)
@@ -780,6 +784,7 @@ namespace llarp::quic
                 stream.id());
             assert(ndatalen >= 0);
             stream.wrote(ndatalen);
+            stream_bytes += ndatalen;
             it = strs.erase(it);
             continue;
           }
@@ -811,6 +816,7 @@ namespace llarp::quic
         {
           log::debug(logcat, "consumed {} bytes from stream {}", ndatalen, stream.id());
           stream.wrote(ndatalen);
+          stream_bytes += ndatalen;
         }
 
         if (nwrite == 0)  //  we are congested
@@ -832,7 +838,7 @@ namespace llarp::quic
         }
 
         log::debug(logcat, "Sending stream data packet");
-        if (!send_packet(nwrite))
+        if (auto rv = send_packet(nwrite); rv != 0)
           return;
 
         ngtcp2_conn_update_pkt_tx_time(conn.get(), ts);
@@ -845,29 +851,45 @@ namespace llarp::quic
         {
           log::debug(logcat, "Max stream packets ({}) reached", max_stream_packets);
           ngtcp2_conn_update_pkt_tx_time(conn.get(), ts);
-          return;
+          break;
         }
       }
     }
 
+    bool mid_packet = true;
     // Now try more with stream id -1 and no data: this takes care of things like initial handshake
     // packets, and also finishes off any partially-filled packet from above.
     for (;;)
     {
       log::debug(logcat, "Calling add_stream_data for empty stream");
 
-      auto nwrite = ngtcp2_conn_writev_stream(
-          conn.get(),
-          &path.path,
-          &send_pkt_info,
-          u8data(send_buffer),
-          send_buffer.size(),
-          &ndatalen,
-          flags,
-          -1,
-          nullptr,
-          0,
-          (!ts) ? get_timestamp() : ts);
+      ngtcp2_ssize nwrite = 0;
+      if (mid_packet)
+      {
+        mid_packet = false;
+        nwrite = ngtcp2_conn_writev_stream(
+            conn.get(),
+            &path.path,
+            &send_pkt_info,
+            u8data(send_buffer),
+            send_buffer.size(),
+            &ndatalen,
+            flags,
+            -1,
+            nullptr,
+            0,
+            (!ts) ? get_timestamp() : ts);
+      }
+      else
+      {
+        nwrite = ngtcp2_conn_write_pkt(
+            conn.get(),
+            &path.path,
+            &send_pkt_info,
+            u8data(send_buffer),
+            send_buffer.size(),
+            (!ts) ? get_timestamp() : ts);
+      }
 
       log::debug(logcat, "add_stream_data for non-stream returned [{},{}]", nwrite, ndatalen);
       assert(ndatalen <= 0);
@@ -912,11 +934,13 @@ namespace llarp::quic
       }
 
       log::debug(logcat, "Sending data packet with non-stream data frames");
-      if (auto rv = send_packet(nwrite); rv != 0)
+      if (auto rv = send_packet(nwrite); rv == 0)
         return;
       ngtcp2_conn_update_pkt_tx_time(conn.get(), ts);
     }
 
+    if (stream_bytes_before != stream_bytes)
+      log::debug(logcat, "cumulative stream bytes: {}", stream_bytes);
     log::debug(logcat, "Exiting flush_streams()");
   }
 

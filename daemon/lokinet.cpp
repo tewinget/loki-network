@@ -6,6 +6,8 @@
 #include <llarp/util/fs.hpp>
 #include <llarp/util/str.hpp>
 
+#include <spdlog/sinks/stdout_color_sinks.h>
+
 #ifdef _WIN32
 #include <llarp/win32/service_manager.hpp>
 #include <dbghelp.h>
@@ -642,7 +644,9 @@ main(int argc, char* argv[])
 {
   // Set up a default, stderr logging for very early logging; we'll replace this later once we read
   // the desired log info from config.
-  llarp::log::add_sink(llarp::log::Type::Print, "stderr");
+  llarp::setup_log_sink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>(
+                            spdlog::color_mode::always);
+  llarp::log::add_sink(llarp::setup_log_sink);
   llarp::log::reset_level(llarp::log::Level::info);
 
   llarp::logRingBuffer = std::make_shared<llarp::log::RingBufferSink>(100);
