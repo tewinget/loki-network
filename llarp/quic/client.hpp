@@ -27,7 +27,7 @@ namespace llarp::quic
 
    private:
     size_t
-    write_packet_header(nuint16_t remote_port, uint8_t ecn) override;
+    write_packet_header(nuint16_t remote_port, uint8_t ecn, uint8_t second_pktnum_byte) override;
   };
 
 }  // namespace llarp::quic

@@ -429,6 +429,18 @@ namespace llarp::quic
   }
 #endif
 
+  int64_t Connection::last_sent_pktnum() const
+  {
+    if (conn) return conn->pktns.tx.last_pkt_num;
+    return 0;
+  }
+
+  int64_t Connection::last_received_pktnum() const
+  {
+    if (conn) return conn->pktns.rx.max_pkt_num;
+    return 0;
+  }
+
   io_result
   Connection::send()
   {
@@ -438,7 +450,7 @@ namespace llarp::quic
 
     if (!send_data.empty())
     {
-      rv = endpoint.send_packet(path.remote, send_data, send_pkt_info.ecn);
+      rv = endpoint.send_packet(path.remote, send_data, send_pkt_info.ecn, (last_sent_pktnum() >> 8) & 0xFF);
     }
     return rv;
   }

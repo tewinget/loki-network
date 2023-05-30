@@ -29,7 +29,7 @@ namespace llarp::quic
     accept_initial_connection(const Packet& p) override;
 
     size_t
-    write_packet_header(nuint16_t pport, uint8_t ecn) override;
+    write_packet_header(nuint16_t pport, uint8_t ecn, uint8_t second_pktnum_byte) override;
   };
 
 }  // namespace llarp::quic

@@ -65,12 +65,13 @@ namespace llarp::quic
   }
 
   size_t
-  Server::write_packet_header(nuint16_t pport, uint8_t ecn)
+  Server::write_packet_header(nuint16_t pport, uint8_t ecn, uint8_t second_pktnum_byte)
   {
     buf_[0] = SERVER_TO_CLIENT;
     std::memcpy(&buf_[1], &pport.n, 2);  // remote quic pseudo-port (network order u16)
     buf_[3] = std::byte{ecn};
-    return 4;
+    buf_[4] = std::byte{second_pktnum_byte};
+    return 5;
   }
 
 }  // namespace llarp::quic

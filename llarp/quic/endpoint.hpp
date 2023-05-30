@@ -43,7 +43,7 @@ namespace llarp::quic
     /// address based on the convo tag.  The port is not used.
     /// \param ecn - the packet ecn parameter
     void
-    receive_packet(Address addr, uint8_t ecn, bstring_view data);
+    receive_packet(Address addr, uint8_t ecn, const uint8_t second_pktnum_byte, bstring_view data);
 
     /// Returns a shared pointer to the uvw loop.
     std::shared_ptr<uvw::Loop>
@@ -111,7 +111,7 @@ namespace llarp::quic
 
     // Called to handle an incoming packet
     void
-    handle_packet(const Packet& p);
+    handle_packet(const Packet& p, const uint8_t second_pktnum_byte);
 
     // Internal method: handles initial common packet decoding, returns the connection ID or nullopt
     // if decoding failed.
@@ -119,7 +119,7 @@ namespace llarp::quic
     handle_packet_init(const Packet& p);
     // Internal method: handles a packet sent to the given connection
     void
-    handle_conn_packet(Connection& c, const Packet& p);
+    handle_conn_packet(Connection& c, const Packet& p, const uint8_t second_pktnum_byte);
 
     // Accept a new incoming connection, i.e. pre-handshake.  Returns a nullptr if the connection
     // can't be created (e.g. because of invalid initial data), or if incoming connections are not
@@ -144,34 +144,38 @@ namespace llarp::quic
     // - port [2 bytes, network order]: client pseudoport (i.e. either a source or destination port
     // depending on type)
     // - ecn value [1 byte]: provided by ngtcp2.  (Only the lower 2 bits are actually used).
+    // - pktnum check byte [1 byte]: included to work around an issue where sometimes rather old
+    // packets would be received and due to quic's packet number encoding ngtcp2 would incorrectly
+    // think they were from the future and cause a protocol error.
     //
     // \param psuedo_port - the remote's pseudo-port (will be 0 if the remote is a server, > 0 for
     // a client remote)
     // \param ecn - the ecn value from ngtcp2
+    // \param second_pktnum_byte - the second-least-significant byte of the quic packet number
     //
     // Returns the number of bytes written to buf_.
     virtual size_t
-    write_packet_header(nuint16_t pseudo_port, uint8_t ecn) = 0;
+    write_packet_header(nuint16_t pseudo_port, uint8_t ecn, uint8_t second_pktnum_byte) = 0;
 
     // Sends a packet to `to` containing `data`. Returns a non-error io_result on success,
     // an io_result with .error_code set to the errno of the failure on failure.
     io_result
-    send_packet(const Address& to, bstring_view data, uint8_t ecn);
+    send_packet(const Address& to, bstring_view data, uint8_t ecn, uint8_t second_pktnum_byte);
 
     // Wrapper around the above that takes a regular std::string_view (i.e. of chars) and recasts
     // it to an string_view of std::bytes.
     io_result
-    send_packet(const Address& to, std::string_view data, uint8_t ecn)
+    send_packet(const Address& to, std::string_view data, uint8_t ecn, uint8_t second_pktnum_byte)
     {
       return send_packet(
-          to, bstring_view{reinterpret_cast<const std::byte*>(data.data()), data.size()}, ecn);
+          to, bstring_view{reinterpret_cast<const std::byte*>(data.data()), data.size()}, ecn, second_pktnum_byte);
     }
 
     // Another wrapper taking a vector
     io_result
-    send_packet(const Address& to, const std::vector<std::byte>& data, uint8_t ecn)
+    send_packet(const Address& to, const std::vector<std::byte>& data, uint8_t ecn, uint8_t second_pktnum_byte)
     {
-      return send_packet(to, bstring_view{data.data(), data.size()}, ecn);
+      return send_packet(to, bstring_view{data.data(), data.size()}, ecn, second_pktnum_byte);
     }
 
     void

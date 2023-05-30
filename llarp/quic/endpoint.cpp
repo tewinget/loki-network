@@ -15,11 +15,79 @@
 
 #include <uvw/timer.h>
 #include <oxenc/variant.h>
+#include <oxenc/endian.h>
+#include <oxenc/hex.h>
 
 extern "C"
 {
 #include <sodium/crypto_generichash.h>
 #include <sodium/randombytes.h>
+}
+
+// quic packet number decoding code adapted from ngtcp2 internals, as the functions are not
+// exposed
+namespace {
+  const uint8_t *ngtcp2_get_uint32(uint32_t *dest, const uint8_t *p) {
+    uint32_t n;
+    memcpy(&n, p, sizeof(n));
+    *dest = oxenc::big_to_host(n);
+    return p + sizeof(n);
+  }
+
+  const uint8_t *ngtcp2_get_uint24(uint32_t *dest, const uint8_t *p) {
+    uint32_t n = 0;
+    memcpy(((uint8_t *)&n) + 1, p, 3);
+    *dest = oxenc::big_to_host(n);
+    return p + 3;
+  }
+
+  const uint8_t *ngtcp2_get_uint16(uint16_t *dest, const uint8_t *p) {
+    uint16_t n;
+    memcpy(&n, p, sizeof(n));
+    *dest = oxenc::big_to_host(n);
+    return p + sizeof(n);
+  }
+
+  int64_t get_pkt_num(const uint8_t *p, size_t pkt_numlen) {
+    uint32_t l;
+    uint16_t s;
+
+    switch (pkt_numlen) {
+    case 1:
+      return *p;
+    case 2:
+      ngtcp2_get_uint16(&s, p);
+      return (int64_t)s;
+    case 3:
+      ngtcp2_get_uint24(&l, p);
+      return (int64_t)l;
+    case 4:
+      ngtcp2_get_uint32(&l, p);
+      return (int64_t)l;
+    default:
+      return 0;
+    }
+
+    return 0;
+  }
+
+  int64_t ngtcp2_pkt_adjust_pkt_num(int64_t max_pkt_num, int64_t pkt_num,
+                                    size_t n) {
+    int64_t expected = max_pkt_num + 1;
+    int64_t win = (int64_t)1 << n;
+    int64_t hwin = win / 2;
+    int64_t mask = win - 1;
+    int64_t cand = (expected & ~mask) | pkt_num;
+
+    if (cand <= expected - hwin) {
+      assert(cand <= (int64_t)NGTCP2_MAX_VARINT - win);
+      return cand + win;
+    }
+    if (cand > expected + hwin && cand >= win) {
+      return cand - win;
+    }
+    return cand;
+  }
 }
 
 namespace llarp::quic
@@ -56,7 +124,7 @@ namespace llarp::quic
   //    revisit this during libQUICinet
   // Endpoint::receive_packet(const SockAddr& src, uint8_t ecn, bstring_view data)
   void
-  Endpoint::receive_packet(Address remote, uint8_t ecn, bstring_view data)
+  Endpoint::receive_packet(Address remote, uint8_t ecn, const uint8_t second_pktnum_byte, bstring_view data)
   {
     // ngtcp2 wants a local address but we don't necessarily have something so just set it to
     // IPv4 or IPv6 "unspecified" address (0.0.0.0 or ::)
@@ -69,13 +137,13 @@ namespace llarp::quic
 
     log::trace(logcat, "[{},ecn={}]: received {} bytes", pkt.path, pkt.info.ecn, data.size());
 
-    handle_packet(pkt);
+    handle_packet(pkt, second_pktnum_byte);
 
     log::debug(logcat, "Done handling packet");
   }
 
   void
-  Endpoint::handle_packet(const Packet& p)
+  Endpoint::handle_packet(const Packet& p, const uint8_t second_pktnum_byte)
   {
     auto maybe_dcid = handle_packet_init(p);
     if (!maybe_dcid)
@@ -107,7 +175,7 @@ namespace llarp::quic
     else
       log::debug(logcat, "CID is primary CID");
 
-    handle_conn_packet(*connptr, p);
+    handle_conn_packet(*connptr, p, second_pktnum_byte);
   }
 
   std::optional<ConnectionID>
@@ -136,7 +204,7 @@ namespace llarp::quic
   }
 
   void
-  Endpoint::handle_conn_packet(Connection& conn, const Packet& p)
+  Endpoint::handle_conn_packet(Connection& conn, const Packet& p, const uint8_t second_pktnum_byte)
   {
     if (ngtcp2_conn_is_in_closing_period(conn))
     {
@@ -151,6 +219,32 @@ namespace llarp::quic
       // connection alive just to catch (and discard) straggling packets that arrive
       // out of order w.r.t to connection close.
       return;
+    }
+
+    /* Because of how quic packet numbers are encoded (and decoded), a quic packet which is too
+     * old could be interpreted as having an incorrectly high packet number, e.g. if pktnum 230
+     * is delivered and pktnum 400 has already been delivered and ACKed by quic, quic will
+     * treat that 230 as 230+256 and send an ACK for packet 486 which doesn't exist, causing
+     * a protocol error.  To prevent that, we include the second byte (bits 2^8 through 2^15)
+     * of the actual packet number in our lokinet packet and compare that to what ngtcp2 will
+     * interpret the packet number as.
+     */
+    auto pkt = reinterpret_cast<const uint8_t*>(p.data.data());
+    auto max_rx_pkt = conn.last_received_pktnum();
+    if (max_rx_pkt and (pkt[0] & 0x80) == 0) // only do this on short header packets
+    {
+      uint8_t pktnum_len = (pkt[0] & 3) + 1;
+      int64_t pktnum = get_pkt_num(pkt + 1 + NGTCP2_MAX_CIDLEN, pktnum_len);
+      auto adjusted = ngtcp2_pkt_adjust_pkt_num(max_rx_pkt, pktnum, pktnum_len * 8);
+      log::debug(logcat, "adjusted: {} = adjust({}, {}, {})", adjusted, max_rx_pkt, pktnum, pktnum_len*8);
+      uint8_t adjusted_second_byte = (adjusted >> 8) & 0xFF;
+      if (adjusted_second_byte != second_pktnum_byte)
+      {
+        log::debug(logcat, "Received too-old QUIC packet; pktnum would be parsed incorrectly. Dropping.");
+        log::debug(logcat, "ngtcp2 second byte: {}, actual second byte: {}",
+            adjusted_second_byte, second_pktnum_byte);
+        return;
+      }
     }
 
     if (auto result = read_packet(p, conn); !result)
@@ -206,11 +300,11 @@ namespace llarp::quic
   }
 
   io_result
-  Endpoint::send_packet(const Address& to, bstring_view data, uint8_t ecn)
+  Endpoint::send_packet(const Address& to, bstring_view data, uint8_t ecn, uint8_t second_pktnum_byte)
   {
     assert(service_endpoint.Loop()->inEventLoop());
 
-    size_t header_size = write_packet_header(to.port(), ecn);
+    size_t header_size = write_packet_header(to.port(), ecn, second_pktnum_byte);
     size_t outgoing_len = header_size + data.size();
     assert(outgoing_len <= buf_.size());
     std::memcpy(&buf_[header_size], data.data(), data.size());
@@ -259,7 +353,7 @@ namespace llarp::quic
     if (nwrote <= 0)
       return;
 
-    if (auto rv = send_packet(source, bstring_view{buf.data(), static_cast<size_t>(nwrote)}, 0);
+    if (auto rv = send_packet(source, bstring_view{buf.data(), static_cast<size_t>(nwrote)}, 0, 0);
         not rv)
       log::warning(logcat, "Failed to send version negotiation packet");
   }
@@ -321,7 +415,7 @@ namespace llarp::quic
 
     assert(conn.closing && !conn.conn_buffer.empty());
 
-    if (auto sent = send_packet(conn.path.remote, conn.conn_buffer, 0); not sent)
+    if (auto sent = send_packet(conn.path.remote, conn.conn_buffer, 0,conn.last_sent_pktnum()); not sent)
     {
       log::warning(
           logcat,

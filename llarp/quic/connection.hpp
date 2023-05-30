@@ -228,6 +228,9 @@ namespace llarp::quic
       return conn.get();
     }
 
+    int64_t last_sent_pktnum() const;
+    int64_t last_received_pktnum() const;
+
     // If this connection's endpoint is a server, returns a pointer to it.  Otherwise returns
     // nullptr.
     Server*

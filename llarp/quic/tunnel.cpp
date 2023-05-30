@@ -704,7 +704,8 @@ namespace llarp::quic
     std::memcpy(&pseudo_port_n.n, &buf.base[1], 2);
     uint16_t pseudo_port = ToHost(pseudo_port_n).h;
     auto ecn = static_cast<uint8_t>(buf.base[3]);
-    bstring_view data{reinterpret_cast<const std::byte*>(&buf.base[4]), buf.sz - 4};
+    auto second_pktnum_byte = static_cast<uint8_t>(buf.base[4]);
+    bstring_view data{reinterpret_cast<const std::byte*>(&buf.base[5]), buf.sz - 5};
 
     huint16_t remote_port{pseudo_port};
 
@@ -762,6 +763,6 @@ namespace llarp::quic
         __LINE__);
 
     auto remote_addr = Address{SockAddr{"::1"sv, remote_port}, std::move(remote)};
-    ep->receive_packet(std::move(remote_addr), ecn, data);
+    ep->receive_packet(std::move(remote_addr), ecn, second_pktnum_byte, data);
   }
 }  // namespace llarp::quic
