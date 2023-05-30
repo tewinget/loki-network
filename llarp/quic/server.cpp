@@ -46,7 +46,7 @@ namespace llarp::quic
       return nullptr;
     }
 
-    if (hd.type == NGTCP2_PKT_INITIAL && hd.token.len)
+    if (hd.type == NGTCP2_PKT_INITIAL && hd.tokenlen)
     {
       // This is a normal QUIC thing, but we don't do it:
       log::warning(logcat, "Unexpected token in initial packet");

@@ -381,8 +381,8 @@ namespace llarp::quic
       log::warning(logcat, "Connection {} handshake timed out, closing now", conn.base_cid);
     }
 
-    ngtcp2_connection_close_error err;
-    ngtcp2_connection_close_error_set_transport_error_liberr(
+    ngtcp2_ccerr err;
+    ngtcp2_ccerr_set_liberr(
         &err,
         code,
         reinterpret_cast<uint8_t*>(const_cast<char*>(close_reason.data())),

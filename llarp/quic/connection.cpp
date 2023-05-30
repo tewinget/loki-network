@@ -564,6 +564,7 @@ namespace llarp::quic
     // - For the server, .base_cid={serverid} and .dest_cid={clientid}
 
     tparams.original_dcid = header.dcid;
+    tparams.original_dcid_present = 1; // docs say server must set this to nonzero
 
     log::debug(logcat, "original_dcid is now set to {}", ConnectionID(tparams.original_dcid));
 
@@ -835,13 +836,13 @@ namespace llarp::quic
         {
           log::debug(logcat, "Done stream writing to {} (stream is congested)", stream.id());
 
-          ngtcp2_conn_stat cstat;
-          ngtcp2_conn_get_conn_stat(conn.get(), &cstat);
+          ngtcp2_conn_info cinfo;
+          ngtcp2_conn_get_conn_info(conn.get(), &cinfo);
           log::debug(
               logcat,
               "Current unacked bytes in flight: {}, Congestion window: {}",
-              cstat.bytes_in_flight,
-              cstat.cwnd);
+              cinfo.bytes_in_flight,
+              cinfo.cwnd);
           ngtcp2_conn_update_pkt_tx_time(conn.get(), ts);
           //  we are congested, so clear pending streams to exit outer loop
           //  and enter next loop to flush unsent stuff
@@ -911,13 +912,13 @@ namespace llarp::quic
         log::debug(
             logcat, "Nothing else to write for non-stream data for now (or we are congested)");
 
-        ngtcp2_conn_stat cstat;
-        ngtcp2_conn_get_conn_stat(conn.get(), &cstat);
+        ngtcp2_conn_info cinfo;
+        ngtcp2_conn_get_conn_info(conn.get(), &cinfo);
         log::debug(
             logcat,
             "Current unacked bytes in flight: {}, Congestion window: {}",
-            cstat.bytes_in_flight,
-            cstat.cwnd);
+            cinfo.bytes_in_flight,
+            cinfo.cwnd);
 
         break;
       }
@@ -1155,7 +1156,7 @@ namespace llarp::quic
       }
     }
 
-    ngtcp2_conn_handshake_completed(conn.get());
+    ngtcp2_conn_tls_handshake_completed(conn.get());
 
     if (on_handshake_complete)
     {
@@ -1449,10 +1450,8 @@ namespace llarp::quic
     }
 
     const bool is_server = ngtcp2_conn_is_server(conn.get());
-    auto exttype = is_server ? NGTCP2_TRANSPORT_PARAMS_TYPE_ENCRYPTED_EXTENSIONS
-                             : NGTCP2_TRANSPORT_PARAMS_TYPE_CLIENT_HELLO;
 
-    if (ngtcp2_ssize nwrite = ngtcp2_encode_transport_params(buf, bufend - buf, exttype, tparams);
+    if (ngtcp2_ssize nwrite = ngtcp2_transport_params_encode(buf, bufend - buf, tparams);
         nwrite >= 0)
     {
       assert(nwrite > 0);
