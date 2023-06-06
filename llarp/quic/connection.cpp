@@ -947,7 +947,7 @@ namespace llarp::quic
       }
 
       log::debug(logcat, "Sending data packet with non-stream data frames");
-      if (auto rv = send_packet(nwrite); rv == 0)
+      if (auto rv = send_packet(nwrite); rv != 0)
         return;
       ngtcp2_conn_update_pkt_tx_time(conn.get(), ts);
     }
