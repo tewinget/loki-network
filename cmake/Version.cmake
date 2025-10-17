@@ -10,8 +10,8 @@ else()
   if(EXISTS "${GIT_INDEX_FILE}" AND ( GIT_FOUND OR Git_FOUND) )
       message(STATUS "Found Git: ${GIT_EXECUTABLE}")
       set(genversion_args "-DGIT=${GIT_EXECUTABLE}")
-      foreach(v session_router_VERSION session_router_VERSION_MAJOR session_router_VERSION_MINOR session_router_VERSION_PATCH RELEASE_MOTTO)
-          list(APPEND genversion_args "-D${v}=${${v}}")
+      foreach(v MAJOR MINOR PATCH)
+          list(APPEND genversion_args "-Dsession-router_VERSION_${v}=${session-router_VERSION_${v}}")
       endforeach()
 
       add_custom_command(
