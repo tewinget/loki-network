@@ -15,7 +15,7 @@ namespace srouter
 }
 namespace oxen::quic
 {
-    class Ticker;
+    struct Ticker;
 }
 
 namespace srouter::consensus
