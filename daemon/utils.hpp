@@ -14,7 +14,7 @@ namespace llarp::controller
 
     struct rpc_controller;
 
-    struct lokinet_instance
+    struct session_router_instance
     {
         friend struct rpc_controller;
 
@@ -22,7 +22,7 @@ namespace llarp::controller
         static size_t next_id;
 
       public:
-        lokinet_instance(omq::ConnectionID c) : ID{++next_id}, cid{std::move(c)} {}
+        session_router_instance(omq::ConnectionID c) : ID{++next_id}, cid{std::move(c)} {}
 
         const size_t ID;
         omq::ConnectionID cid;
@@ -34,7 +34,7 @@ namespace llarp::controller
 
       private:
         std::shared_ptr<omq::OxenMQ> _omq;
-        std::unordered_map<omq::address, lokinet_instance> _binds;
+        std::unordered_map<omq::address, session_router_instance> _binds;
         std::map<size_t, omq::address> _indexes;
 
         void _initiate(omq::address src, std::string remote);

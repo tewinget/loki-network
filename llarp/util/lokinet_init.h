@@ -5,7 +5,7 @@ extern "C"
 {
 #endif
 
-    int Lokinet_INIT(void);
+    int Session_Router_INIT(void);
 
 #ifdef __cplusplus
 }

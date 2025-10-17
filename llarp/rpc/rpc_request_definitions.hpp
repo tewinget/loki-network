@@ -17,7 +17,7 @@
 namespace llarp::rpc
 {
     //  RPC: halt
-    //    Stops lokinet router
+    //    Stops Session Router router
     //
     //  Inputs: none
     //
@@ -41,7 +41,7 @@ namespace llarp::rpc
     };
 
     //  RPC: status
-    //    Returns that current activity status of lokinet router
+    //    Returns that current activity status of Session Router router
     //    Calls router::extractstatus
     //
     //  Inputs: none
@@ -246,7 +246,7 @@ namespace llarp::rpc
 #endif
 
     //  RPC: config
-    //    Runs lokinet router using .ini config file passed as path
+    //    Runs Session Router router using .ini config file passed as path
     //
     //  Inputs:
     //    "filename" : name of .ini file to either save or delete

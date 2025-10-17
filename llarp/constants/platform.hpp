@@ -77,7 +77,7 @@ namespace llarp::platform
 
     /// are we running with pybind simulation mode enabled?
     inline constexpr bool is_simulation =
-#ifdef LOKINET_HIVE
+#ifdef SROUTER_HIVE
         true
 #else
         false

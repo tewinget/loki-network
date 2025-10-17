@@ -18,7 +18,7 @@ namespace oxen::quic
     class Loop;
 }
 
-namespace lokinet
+namespace session_router
 {
     enum class Network
     {
@@ -41,62 +41,62 @@ namespace lokinet
         /// mapping for UDP).
         uint16_t remote_port;
 
-        /// The bound local port.  After establishing a lokinet session, clients connect (TCP) or
-        /// send (UDP) to this port (on address 127.0.0.1) to reach the destination through lokinet.
+        /// The bound local port.  After establishing a Session Router session, clients connect (TCP) or
+        /// send (UDP) to this port (on address 127.0.0.1) to reach the destination through session_router.
         uint16_t local_port;
 
         /// A suggested maximum MTU for the connection.  If the application supports a configurable
         /// MTU, this value is the recommended value that avoids some additional overhead from
         /// packet splitting, which can slightly reduce latency and jitter.  If the application
-        /// doesn't support MTU configuration then this value can simply be ignored and Lokinet will
+        /// doesn't support MTU configuration then this value can simply be ignored and Session Router will
         /// split any "too large" packets into two.
         uint16_t suggested_mtu;
     };
 
-    class Lokinet
+    class SessionRouter
     {
         std::unique_ptr<llarp::Context> context;
 
         struct path_ctor
         {};
-        Lokinet(path_ctor, const std::filesystem::path& p, std::shared_ptr<oxen::quic::Loop> loop);
+        SessionRouter(path_ctor, const std::filesystem::path& p, std::shared_ptr<oxen::quic::Loop> loop);
 
       public:
-        // Starts an embedded lokinet that loads the given string contents as a config file.
-        explicit Lokinet(std::string config, std::shared_ptr<oxen::quic::Loop> existing_loop = nullptr);
+        // Starts an embedded Session Router that loads the given string contents as a config file.
+        explicit SessionRouter(std::string config, std::shared_ptr<oxen::quic::Loop> existing_loop = nullptr);
 
-        // Starts an embedded lokinet instance with extra configuration specified in the given
+        // Starts an embedded Session Router instance with extra configuration specified in the given
         // config file.  (Templatized to avoid ambiguous implicit conversion from std::string
         // conflicting with the constructor above.)
         template <std::same_as<std::filesystem::path> FSPath>
-        explicit Lokinet(const FSPath& config, std::shared_ptr<oxen::quic::Loop> existing_loop = nullptr)
-            : Lokinet{path_ctor{}, config, std::move(existing_loop)}
+        explicit SessionRouter(const FSPath& config, std::shared_ptr<oxen::quic::Loop> existing_loop = nullptr)
+            : SessionRouter{path_ctor{}, config, std::move(existing_loop)}
         {}
 
-        // Starts an embedded lokinet with default config that runs on the given network with
+        // Starts an embedded Session Router with default config that runs on the given network with
         // default settings.
-        explicit Lokinet(Network network, std::shared_ptr<oxen::quic::Loop> existing_loop = nullptr);
+        explicit SessionRouter(Network network, std::shared_ptr<oxen::quic::Loop> existing_loop = nullptr);
 
-        // Destructor stops the lokinet instance.  The destructor blocks until shutdown is complete.
-        ~Lokinet();
+        // Destructor stops the Session Router instance.  The destructor blocks until shutdown is complete.
+        ~SessionRouter();
 
-        // Schedules the given callback to be fired when Lokinet edge connections are mostly
-        // established (and thus Lokinet is ready to start building paths).  If lokinet is already
+        // Schedules the given callback to be fired when Session Router edge connections are mostly
+        // established (and thus Session Router is ready to start building paths).  If Session Router is already
         // established, this will schedule an immediate invocation of the callback.
         //
-        // If persist is true then the callback will be stored and called *each* time Lokinet enters
-        // the connected state (i.e. it will be called again if Lokinet loses all connectivity and
+        // If persist is true then the callback will be stored and called *each* time Session Router enters
+        // the connected state (i.e. it will be called again if Session Router loses all connectivity and
         // then regains connections).
         void on_connected(std::function<void()> callback, bool persist = false);
 
-        // Schedules the given callback to be fired when Lokinet becomes fully disconnected, i.e.
+        // Schedules the given callback to be fired when Session Router becomes fully disconnected, i.e.
         // loses all established edge connections.  If persist is true then the callback will be
-        // fired *each* time Lokinet transitions from connected to disconnected state.  If Lokinet
+        // fired *each* time Session Router transitions from connected to disconnected state.  If Session Router
         // is not currently connected then the callback will be scheduled immediately.
         void on_disconnected(std::function<void()> callback, bool persist = false);
 
         // Establishes a UDP session to the given remote (.loki or .snode) and port.  When the
-        // lokinet session to the remote is established, the callback is invoked with the info
+        // Session Router session to the remote is established, the callback is invoked with the info
         // corresponding to the session and tunnel.  This call can happen instantly (before this
         // function call returns) if a session to the given address is already established, but
         // otherwise the callback will be called at some future point when the callback is
@@ -104,11 +104,11 @@ namespace lokinet
         //
         // If a connection cannot be established for whatever reason, the `on_failed` callback is
         // invoked with a string giving a descriptive reason.  Like `on_established`, it is possible
-        // for this to fire immediately, such as for an unparseable address or if Lokinet can
+        // for this to fire immediately, such as for an unparseable address or if Session Router can
         // determine immediately that the connection will fail.
         //
-        // The callbacks must not block as they are called from Lokinet's logic thread (and so any
-        // blocking will stall Lokinet).
+        // The callbacks must not block as they are called from Session Router's logic thread (and so any
+        // blocking will stall Session Router).
         void establish_udp(
             std::string_view remote_view,
             uint16_t port,
@@ -122,6 +122,6 @@ namespace lokinet
         tunnel_info establish_udp_blocking(std::string_view remote, uint16_t port);
     };
 
-    template Lokinet::Lokinet(const std::filesystem::path&, std::shared_ptr<oxen::quic::Loop>);
+    template SessionRouter::SessionRouter(const std::filesystem::path&, std::shared_ptr<oxen::quic::Loop>);
 
-}  // namespace lokinet
+}  // namespace Session Router

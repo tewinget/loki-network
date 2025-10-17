@@ -136,7 +136,7 @@ namespace llarp::rpc
     {
         log_print_rpc(version);
 
-        nlohmann::json result{{"version", llarp::LOKINET_VERSION_FULL}, {"uptime", to_json(_router.Uptime())}};
+        nlohmann::json result{{"version", llarp::SROUTER_VERSION_FULL}, {"uptime", to_json(_router.Uptime())}};
 
         SetJSONResponse(result, version.response);
     }
@@ -757,7 +757,7 @@ namespace llarp::rpc
 
         if (!log_subs)
         {
-            m.send_reply("This Lokinet instance is not capturing logs");
+            m.send_reply("This Session Router instance is not capturing logs");
             return;
         }
 

@@ -107,7 +107,7 @@ namespace llarp::vpn
         virtual AbstractRouteManager& RouteManager() = 0;
 
         /// create a packet io that will read (and optionally write) packets on a network interface
-        /// the lokinet process does not own
+        /// the Session Router process does not own
         /// @param index the interface index of the network interface to use or 0 for all
         /// interfaces on the system
         virtual std::shared_ptr<PacketIO> create_packet_io(

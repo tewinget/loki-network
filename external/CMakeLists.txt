@@ -59,7 +59,7 @@ endmacro()
 
 system_or_submodule(OXENC oxenc oxenc::oxenc liboxenc>=1.5.0 oxen-libquic/external/oxen-encoding)
 system_or_submodule(OXENLOGGING oxen-logging oxen::logging liboxen-logging>=1.2.0 oxen-libquic/external/oxen-logging)
-if(LOKINET_FULL)
+if(SROUTER_FULL)
     system_or_submodule(OXENMQ oxenmq oxenmq::oxenmq liboxenmq>=1.3 oxen-mq)
 endif()
 system_or_submodule(FMT fmt fmt::fmt fmt>=9 oxen-libquic/external/oxen-logging/fmt)
@@ -69,7 +69,7 @@ set(JSON_Install OFF CACHE INTERNAL "")
 system_or_submodule(NLOHMANN nlohmann_json nlohmann_json::nlohmann_json nlohmann_json>=3.7.0 nlohmann)
 
 
-if(LOKINET_HIVE)
+if(SROUTER_HIVE)
   add_subdirectory(pybind11 EXCLUDE_FROM_ALL)
 endif()
 
@@ -77,7 +77,7 @@ endif()
 system_or_submodule(CLI11 CLI11 CLI11::CLI11 CLI11>=2.3.0 CLI11)
 
 
-if(LOKINET_PEERSTATS)
+if(SROUTER_PEERSTATS)
   add_library(sqlite_orm INTERFACE)
   target_include_directories(sqlite_orm SYSTEM INTERFACE sqlite_orm/include)
   if(NOT TARGET sqlite3)
@@ -108,11 +108,11 @@ endif()
 
 option(WITH_LIBCRYPT "enable fast password hash with libcrypt" ${default_libcrypt})
 
-add_library(lokinet-libcrypt INTERFACE)
+add_library(session-router-libcrypt INTERFACE)
 if(WITH_LIBCRYPT)
   pkg_check_modules(LIBCRYPT libcrypt IMPORTED_TARGET REQUIRED)
-  target_compile_definitions(lokinet-libcrypt INTERFACE LOKINET_HAVE_CRYPT)
-  target_link_libraries(lokinet-libcrypt INTERFACE PkgConfig::LIBCRYPT)
+  target_compile_definitions(session-router-libcrypt INTERFACE SROUTER_HAVE_CRYPT)
+  target_link_libraries(session-router-libcrypt INTERFACE PkgConfig::LIBCRYPT)
   message(STATUS "using libcrypt ${LIBCRYPT_VERSION}")
 else()
   # TODO static build lib crypt?

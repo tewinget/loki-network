@@ -56,7 +56,7 @@ namespace llarp::dns
             if (auto maybe_addr = bound_on())
             {
                 _local_addr = *maybe_addr;
-                log::debug(logcat, "lokinet DNS server bound on {}", _local_addr);
+                log::debug(logcat, "session-router DNS server bound on {}", _local_addr);
             }
             else
                 throw std::runtime_error{"cannot find which address our dns socket is bound on"};
@@ -663,7 +663,7 @@ namespace llarp::dns
         // TLS needs X509/ASN.1-DER and opting into the Root CA Cabal
         // thankfully mozilla added a backdoor that allows ISPs to turn it off
         // so we disable DoH for firefox using mozilla's ISP backdoor
-        // see: https://github.com/oxen-io/lokinet/issues/832
+        // see: https://github.com/oxen-io/Session Router/issues/832
         for (const auto& q : msg.questions)
         {
             // is this firefox looking for their backdoor record?

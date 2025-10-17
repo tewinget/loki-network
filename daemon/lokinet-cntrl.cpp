@@ -108,25 +108,25 @@ namespace
             ->immediate_callback();
 
         auto* list_subcom =
-            app.add_subcommand("list", "List all lokinet instances currently running on the local machine");
+            app.add_subcommand("list", "List all Session Router instances currently running on the local machine");
         list_subcom->callback([&]() { rpc.list_all(); })->immediate_callback();
 
-        auto* refresh_subcom = app.add_subcommand("refresh", "Refresh local lokinet instance information");
+        auto* refresh_subcom = app.add_subcommand("refresh", "Refresh local Session Router instance information");
         refresh_subcom->callback([&]() { rpc.refresh(); });
 
         auto* instance_subcom =
-            app.add_subcommand("instance", "Select a lokinet instance")->require_option(1)->require_subcommand(1);
-        auto* aopt = instance_subcom->add_option("-a, --address", address, "Local RPC address of lokinet instance")
+            app.add_subcommand("instance", "Select a Session Router instance")->require_option(1)->require_subcommand(1);
+        auto* aopt = instance_subcom->add_option("-a, --address", address, "Local RPC address of Session Router instance")
                          ->type_name("IP:PORT");
         auto* iopt =
-            instance_subcom->add_option("-i, --index", index, "Index of local lokinet instance (use 'list' to query!)");
+            instance_subcom->add_option("-i, --index", index, "Index of local Session Router instance (use 'list' to query!)");
 
         aopt->excludes(iopt);
         iopt->excludes(aopt);
 
         auto* init_subcom =
             instance_subcom->add_subcommand("init", "Initiate session to a remote instance")->require_option(1);
-        init_subcom->add_option("-p, --pubkey", pubkey, "PubKey of remote lokinet instance");
+        init_subcom->add_option("-p, --pubkey", pubkey, "PubKey of remote Session Router instance");
 
         init_subcom->callback([&]() {
             if (not address.empty())
@@ -135,7 +135,7 @@ namespace
                 rpc.initiate(index, std::move(pubkey));
         });
 
-        auto* status_subcom = instance_subcom->add_subcommand("status", "Query status of local lokinet instance");
+        auto* status_subcom = instance_subcom->add_subcommand("status", "Query status of local Session Router instance");
 
         status_subcom->callback([&]() {
             if (not address.empty())
@@ -146,7 +146,7 @@ namespace
 
         auto* close_subcom =
             instance_subcom->add_subcommand("close", "Close session to a remote instance")->require_option(1);
-        close_subcom->add_option("-p, --pubkey", pubkey, "PubKey of remote lokinet instance");
+        close_subcom->add_option("-p, --pubkey", pubkey, "PubKey of remote Session Router instance");
 
         close_subcom->callback([&]() {
             if (not address.empty())
@@ -155,7 +155,7 @@ namespace
                 rpc.close(index, std::move(pubkey));
         });
 
-        auto* halt_subcom = instance_subcom->add_subcommand("halt", "Immediately halt lokinet instance");
+        auto* halt_subcom = instance_subcom->add_subcommand("halt", "Immediately halt Session Router instance");
 
         halt_subcom->callback([&]() {
             if (not address.empty())
@@ -236,7 +236,7 @@ int main(int argc, char* argv[])
     if (auto rv = prefigure(); rv != 0)
         return rv;
 
-    CLI::App cli{"loki controller - lokinet instance control utility", "lokinet-cntrl"};
+    CLI::App cli{"loki controller - Session Router instance control utility", "session-router-cntrl"};
     cli.get_formatter()->column_width(50);
     cli_opts options{};
 

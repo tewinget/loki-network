@@ -1,5 +1,5 @@
-add_library(lokinet-android
+add_library(session-router-android
     SHARED
-    lokinet_config.cpp
-    lokinet_daemon.cpp)
-target_link_libraries(lokinet-android lokinet-amalgum)
+    sessionrouter_config.cpp
+    sessionrouter_daemon.cpp)
+target_link_libraries(session-router-android session-router-amalgum)

@@ -15,8 +15,8 @@ namespace llarp
         NONE = 0,
         EXIT = 1 << 0,         // This client is configured to route (some) exit traffic
         QUIC_TUNNEL = 1 << 1,  // This client supports QUIC tunnel (currently always enabled)
-        IPV4 = 1 << 2,         // This client support Lokinet raw IPv4 packets (always set for non-embedded clients)
-        IPV6 = 1 << 3,         // This client support Lokinet raw IPv6 packets (not yet supported)
+        IPV4 = 1 << 2,         // This client support Session Router raw IPv4 packets (always set for non-embedded clients)
+        IPV6 = 1 << 3,         // This client support Session Router raw IPv6 packets (not yet supported)
     };
     inline constexpr protocol_flag operator&(protocol_flag a, protocol_flag b)
     {

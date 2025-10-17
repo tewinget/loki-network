@@ -1,4 +1,4 @@
-#include <lokinet/lokinet_misc.h>
+#include <session_router/session_router_misc.h>
 #include <spdlog/details/null_mutex.h>
 #include <spdlog/sinks/base_sink.h>
 
@@ -11,12 +11,12 @@ namespace llarp::logging
     class CallbackSink : public spdlog::sinks::base_sink<Mutex>
     {
       private:
-        lokinet_logger_func log_;
-        lokinet_logger_sync sync_;
+        session_router_logger_func log_;
+        session_router_logger_sync sync_;
         void* ctx_;
 
       public:
-        explicit CallbackSink(lokinet_logger_func log, lokinet_logger_sync sync = nullptr, void* context = nullptr)
+        explicit CallbackSink(session_router_logger_func log, session_router_logger_sync sync = nullptr, void* context = nullptr)
             : log_{log}, sync_{sync}, ctx_{context}
         {}
 

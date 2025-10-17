@@ -2,7 +2,7 @@
 
 #include <uv.h>
 
-NSString* error_domain = @"org.lokinet";
+NSString* error_domain = @"org.session";
 
 // Receiving an incoming packet, presumably from libunbound.  NB: this is called from the libuv
 // event loop.

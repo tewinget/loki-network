@@ -258,7 +258,7 @@ namespace llarp::link
         // Closes all connections and stops the network event loop
         void shutdown();
 
-        // Makes a new connection to the given relay as a Lokinet bootstrap client (i.e. using the
+        // Makes a new connection to the given relay as a Session Router bootstrap client (i.e. using the
         // special bootstrapping ALPN, even if this node is a relay) *without* using an existing
         // connection or tracking it in existing connections.  This is primarily used when
         // bootstrapping to avoid having the connection get treated as a regular relay connection on
@@ -270,7 +270,7 @@ namespace llarp::link
         std::pair<std::shared_ptr<quic::Connection>, std::shared_ptr<quic::BTRequestStream>> bootstrap_connect(
             const RelayContact& rc);
 
-        // Makes a new connection to the given relay as a Lokinet client (i.e. using the client
+        // Makes a new connection to the given relay as a Session Router client (i.e. using the client
         // ALPN, even if this node is a relay) *without* using an existing connection or tracking it
         // in existing connections.  This is primarily used for service node testing to ensure we
         // can establish a new connection and avoid having the connection get treated as a regular

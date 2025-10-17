@@ -7,8 +7,8 @@ extern "C"
 {
 #endif
 
-    /// the result of a lokinet stream mapping attempt
-    struct lokinet_stream_result
+    /// the result of a Session Router stream mapping attempt
+    struct session_router_stream_result
     {
         /// set to zero on success otherwise the error that happened
         /// use strerror(3) to get printable string of this error
@@ -26,29 +26,29 @@ extern "C"
     /// connect out to a remote endpoint
     /// remoteAddr is in the form of "name:port"
     /// localAddr is either NULL for any or in the form of "ip:port" to bind to an explicit address
-    void EXPORT lokinet_outbound_stream(
-        struct lokinet_stream_result* result,
+    void EXPORT session_router_outbound_stream(
+        struct session_router_stream_result* result,
         const char* remoteAddr,
         const char* localAddr,
-        struct lokinet_context* context);
+        struct session_router_context* context);
 
     /// stream accept filter determines if we should accept a stream or not
     /// return 0 to accept
     /// return -1 to explicitly reject
     /// return -2 to silently drop
-    typedef int (*lokinet_stream_filter)(const char* remote, uint16_t port, void* userdata);
+    typedef int (*session_router_stream_filter)(const char* remote, uint16_t port, void* userdata);
 
     /// set stream accepter filter
     /// passes user parameter into stream filter as void *
     /// returns stream id
     int EXPORT
-    lokinet_inbound_stream_filter(lokinet_stream_filter acceptFilter, void* user, struct lokinet_context* context);
+    session_router_inbound_stream_filter(session_router_stream_filter acceptFilter, void* user, struct session_router_context* context);
 
     /// simple stream acceptor
-    /// simple variant of lokinet_inbound_stream_filter that maps port to localhost:port
-    int EXPORT lokinet_inbound_stream(uint16_t port, struct lokinet_context* context);
+    /// simple variant of session_router_inbound_stream_filter that maps port to localhost:port
+    int EXPORT session_router_inbound_stream(uint16_t port, struct session_router_context* context);
 
-    void EXPORT lokinet_close_stream(int stream_id, struct lokinet_context* context);
+    void EXPORT session_router_close_stream(int stream_id, struct session_router_context* context);
 
 #ifdef __cplusplus
 }

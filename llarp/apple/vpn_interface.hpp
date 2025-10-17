@@ -19,7 +19,7 @@ namespace llarp::apple
         explicit VPNInterface(
             Context& ctx, packet_write_callback packet_writer, on_readable_callback on_readable, Router* router);
 
-        // Method to call when a packet has arrived to deliver the packet to lokinet
+        // Method to call when a packet has arrived to deliver the packet to Session Router
         bool OfferReadPacket(const llarp_buffer_t& buf);
 
         int PollFD() const override;

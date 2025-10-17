@@ -1,18 +1,18 @@
-set(exetargets lokinet)
+set(exetargets session-router)
 
-add_library(lokinet_daemon STATIC utils.cpp)
-target_link_libraries(lokinet_daemon PUBLIC liblokinet)
+add_library(session_router_daemon STATIC utils.cpp)
+target_link_libraries(session_router_daemon PUBLIC libsessionrouter)
 
 if(APPLE)
-  add_executable(lokinet lokinet.swift)
-  target_compile_options(lokinet BEFORE PRIVATE -target x86_64-apple-macos${CMAKE_OSX_DEPLOYMENT_TARGET})
+  add_executable(session-router session_router.swift)
+  target_compile_options(session-router BEFORE PRIVATE -target x86_64-apple-macos${CMAKE_OSX_DEPLOYMENT_TARGET})
 else()
-  add_executable(lokinet lokinet.cpp)
+  add_executable(session-router session_router.cpp)
 endif()
 
-add_executable(lokinet-cntrl lokinet-cntrl.cpp)
-enable_lto(lokinet lokinet-cntrl)
-list(APPEND exetargets lokinet-cntrl)
+add_executable(session-router-cntrl session-router-cntrl.cpp)
+enable_lto(session-router session-router-cntrl)
+list(APPEND exetargets session-router-cntrl)
 
 
 set(should_install ON)
@@ -44,8 +44,8 @@ foreach(exe ${exetargets})
   elseif(CMAKE_SYSTEM_NAME MATCHES "FreeBSD")
     target_link_directories(${exe} PRIVATE /usr/local/lib)
   endif()
-  target_link_libraries(${exe} PRIVATE lokinet_daemon)
-  if(LOKINET_STRIP)
+  target_link_libraries(${exe} PRIVATE session_router_daemon)
+  if(SROUTER_STRIP)
     add_custom_command(TARGET ${exe}
       POST_BUILD
       COMMAND ${CMAKE_OBJCOPY} ARGS --only-keep-debug $<TARGET_FILE:${exe}> $<TARGET_FILE:${exe}>.debug
@@ -57,22 +57,22 @@ foreach(exe ${exetargets})
       install(TARGETS ${exe}
         BUNDLE DESTINATION "${PROJECT_BINARY_DIR}"
         RUNTIME DESTINATION "."
-        COMPONENT lokinet)
+        COMPONENT session-router)
     else()
-      install(TARGETS ${exe} RUNTIME DESTINATION bin COMPONENT lokinet)
+      install(TARGETS ${exe} RUNTIME DESTINATION bin COMPONENT session-router)
     endif()
   endif()
 endforeach()
 
-target_link_libraries(lokinet PRIVATE CLI11)
-target_link_libraries(lokinet-cntrl PRIVATE CLI11)
+target_link_libraries(session-router PRIVATE CLI11)
+target_link_libraries(session-router-cntrl PRIVATE CLI11)
 
 if(WITH_SETCAP)
-  install(CODE "execute_process(COMMAND ${SETCAP} cap_net_admin,cap_net_bind_service=+eip ${CMAKE_INSTALL_PREFIX}/bin/lokinet)")
+  install(CODE "execute_process(COMMAND ${SETCAP} cap_net_admin,cap_net_bind_service=+eip ${CMAKE_INSTALL_PREFIX}/bin/session-router)")
 endif()
 
-if(LOKINET_STRIP)
+if(SROUTER_STRIP)
   add_custom_target(symbols ALL
-    COMMAND ${CMAKE_COMMAND} -E tar cJf ${CMAKE_CURRENT_BINARY_DIR}/debug-symbols.tar.xz $<TARGET_FILE:lokinet>.debug
-    DEPENDS lokinet)
+    COMMAND ${CMAKE_COMMAND} -E tar cJf ${CMAKE_CURRENT_BINARY_DIR}/debug-symbols.tar.xz $<TARGET_FILE:session-router>.debug
+    DEPENDS session-router)
 endif()

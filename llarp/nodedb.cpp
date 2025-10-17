@@ -69,7 +69,7 @@ namespace llarp
         int n, bool shuffle, const std::function<bool(const RelayContact&)>& predicate) const
     {
         assert(_router.loop.inside());
-#ifdef LOKINET_DEBUG_PATH_SEED
+#ifdef SROUTER_DEBUG_PATH_SEED
         if (auto& s = _router.config().paths.debug_path_seed)
         {
             std::vector<std::reference_wrapper<const RelayContact>> rcs;
@@ -112,7 +112,7 @@ namespace llarp
             if (auto* rc = get_rc(rid))
                 strict_rcs.emplace_back(std::cref(*rc));
 
-#ifdef LOKINET_DEBUG_PATH_SEED
+#ifdef SROUTER_DEBUG_PATH_SEED
         if (auto& s = _router.config().paths.debug_path_seed)
         {
             std::ranges::sort(
@@ -627,7 +627,7 @@ namespace llarp
                 log::warning(
                     logcat,
                     "No bootstrap router contacts were loaded.  The default bootstrap file {} does not "
-                    "exist, and this lokinet binary does not have any fallback bootstraps for the '{}' network.",
+                    "exist, and this Session Router binary does not have any fallback bootstraps for the '{}' network.",
                     def,
                     _router.netid());
             }

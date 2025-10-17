@@ -69,7 +69,7 @@ namespace llarp
         // The OutboundSession will set up an evconnlistener and set the listening socket address inside ::_bound
         quic::Address _bound{};
 
-        // The InboundSession will set this address to the lokinet-primary-ip to connect to
+        // The InboundSession will set this address to the session-router-primary-ip to connect to
         std::optional<quic::Address> _connect = std::nullopt;
 
         socket_t _sock;
@@ -88,7 +88,7 @@ namespace llarp
         static std::shared_ptr<TCPHandle> make_server(quic::Loop& ev, tcpconn_hook cb, uint16_t port = 0);
 
         // The InboundSession object will hold a client that connects to some application configured
-        // lokinet-primary-ip:port every time the OutboundSession opens a new stream over the tunneled connection
+        // session-router-primary-ip:port every time the OutboundSession opens a new stream over the tunneled connection
         static std::shared_ptr<TCPHandle> make_client(quic::Loop& ev, quic::Address connect);
 
         ~TCPHandle();

@@ -197,7 +197,7 @@ namespace llarp
             // The timeout, if omitted/nullopt, defaults to the [paths]build-timeout config option.
             //
             // Note that this resulting session could be outbound or inbound: i.e. if the target is
-            // a client (.loki) that has already established a session to this lokinet instance then
+            // a client (.loki) that has already established a session to this Session Router instance then
             // that existing session is used rather than building a new outbound one.
             //
             // NB: this method can be safely called from outside the event loop (e.g. in embedded

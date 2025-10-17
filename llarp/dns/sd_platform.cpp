@@ -106,8 +106,8 @@ namespace llarp::dns::sd
                 "."      // global DNS root
             );
         else
-            // Only resolve .loki and .snode through lokinet (so you keep using your local DNS
-            // server for everything else, which is nicer than forcing everything though lokinet's
+            // Only resolve .loki and .snode through Session Router (so you keep using your local DNS
+            // server for everything else, which is nicer than forcing everything though Session Router's
             // upstream DNS).
             _dbus(
                 "SetLinkDomains",

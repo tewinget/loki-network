@@ -134,8 +134,8 @@ namespace llarp
         int max_missed_pings{5};
 
         // DEBUG ONLY: if set, this uses a repeatable RNG with the given seed for reproducible path
-        // selection.  This option only has an effect if lokinet is configured with
-        // -DLOKINET_DEBUG_PATH_SEED=ON (which is disabled by default).
+        // selection.  This option only has an effect if Session Router is configured with
+        // -DSROUTER_DEBUG_PATH_SEED=ON (which is disabled by default).
         std::optional<uint64_t> debug_path_seed;
 
         void define_config_options(ConfigDefinition& conf, const ConfigGenParameters& params);
@@ -282,7 +282,7 @@ namespace llarp
 
     struct LoggingConfig
     {
-        // Log type.  If nullopt then lokinet will not set up logging sinks at all (this is
+        // Log type.  If nullopt then Session Router will not set up logging sinks at all (this is
         // primarily aimed at embedded clients that have already set up logging).
         std::optional<log::Type> type = log::Type::Print;
 
@@ -298,7 +298,7 @@ namespace llarp
 
     struct Config
     {
-        // Creates a config for the given lokinet instance type (relay, full client, or embedded
+        // Creates a config for the given Session Router instance type (relay, full client, or embedded
         // client), loading configuration data from the given string, if given (all default config
         // otherwise).  The default data directory (if not explicit set in the given config string)
         // can optionally be provided.  If omitted (and not set in the string) it defaults to cwd.
@@ -307,7 +307,7 @@ namespace llarp
             std::string config = "",
             std::filesystem::path default_data_dir = std::filesystem::current_path());
 
-        // Creates a config for the given lokinet instance type (relay, full client, or embedded
+        // Creates a config for the given Session Router instance type (relay, full client, or embedded
         // client), loading configuration data from an existing file.  The default data directory
         // (if not set in the config itself) will be the directory containing the given config file.
         Config(config::Type type, std::filesystem::path config_file);

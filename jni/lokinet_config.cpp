@@ -1,12 +1,12 @@
-#include "lokinet_jni_common.hpp"
-#include "network_loki_lokinet_LokinetConfig.h"
+#include "sessionrouter_jni_common.hpp"
+#include "network_loki_sessionrouter_SessionRouterConfig.h"
 
 #include <llarp.hpp>
 #include <llarp/config/config.hpp>
 
 extern "C"
 {
-    JNIEXPORT jobject JNICALL Java_network_loki_lokinet_LokinetConfig_Obtain(JNIEnv* env, jclass, jstring dataDir)
+    JNIEXPORT jobject JNICALL Java_network_loki_sessionrouter_SessionRouterConfig_Obtain(JNIEnv* env, jclass, jstring dataDir)
     {
         auto conf = VisitStringAsStringView<llarp::Config*>(
             env, dataDir, [](std::string_view val) -> llarp::Config* { return new llarp::Config{val}; });
@@ -16,13 +16,13 @@ extern "C"
         return env->NewDirectByteBuffer(conf, sizeof(llarp::Config));
     }
 
-    JNIEXPORT void JNICALL Java_network_loki_lokinet_LokinetConfig_Free(JNIEnv* env, jclass, jobject buf)
+    JNIEXPORT void JNICALL Java_network_loki_sessionrouter_SessionRouterConfig_Free(JNIEnv* env, jclass, jobject buf)
     {
         auto ptr = FromBuffer<llarp::Config>(env, buf);
         delete ptr;
     }
 
-    JNIEXPORT jboolean JNICALL Java_network_loki_lokinet_LokinetConfig_Load(JNIEnv* env, jobject self)
+    JNIEXPORT jboolean JNICALL Java_network_loki_sessionrouter_SessionRouterConfig_Load(JNIEnv* env, jobject self)
     {
         auto conf = GetImpl<llarp::Config>(env, self);
         if (conf == nullptr)
@@ -34,7 +34,7 @@ extern "C"
         return JNI_FALSE;
     }
 
-    JNIEXPORT jboolean JNICALL Java_network_loki_lokinet_LokinetConfig_Save(JNIEnv* env, jobject self)
+    JNIEXPORT jboolean JNICALL Java_network_loki_sessionrouter_SessionRouterConfig_Save(JNIEnv* env, jobject self)
     {
         auto conf = GetImpl<llarp::Config>(env, self);
         if (conf == nullptr)
@@ -50,7 +50,7 @@ extern "C"
         return JNI_TRUE;
     }
 
-    JNIEXPORT void JNICALL Java_network_loki_lokinet_LokinetConfig_AddDefaultValue(
+    JNIEXPORT void JNICALL Java_network_loki_sessionrouter_SessionRouterConfig_AddDefaultValue(
         JNIEnv* env, jobject self, jstring section, jstring key, jstring value)
     {
         auto convert = [](std::string_view str) -> std::string { return std::string{str}; };

@@ -86,7 +86,7 @@ namespace llarp
     class Router
     {
       public:
-        // Starts Lokinet immediately upon construction.
+        // Starts Session Router immediately upon construction.
         explicit Router(
             Config conf,
             std::shared_ptr<quic::Loop> loop,

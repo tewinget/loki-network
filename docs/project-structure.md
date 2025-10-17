@@ -1,23 +1,23 @@
-# Lokinet Project Structure 
+# Session Router Project Structure 
 
 this codebase is a bit large. this is a high level map of the current code structure.
 
-## Lokinet executable main functions `(/daemon)`
+## Session Router executable main functions `(/daemon)`
 
-* `lokinet.cpp`: lokinet daemon executable
-* `lokinet.swift`: macos sysex/appex executable
-* `lokinet-vpn.cpp`: lokinet rpc tool for controlling exit node usage
-* `lokinet-bootstrap.cpp`: legacy util for windows, downloads a bootstrap file via https
-
-
-## Lokinet public headers `(/include)`
-
-`lokinet.h and lokinet/*.h`: C headers for embedded lokinet 
-
-`llarp.hpp`: semi-internal C++ header for lokinet executables
+* `session_router.cpp`: Session Router daemon executable
+* `session_router.swift`: macos sysex/appex executable
+* `session-router-vpn.cpp`: Session Router rpc tool for controlling exit node usage
+* `session-router-bootstrap.cpp`: legacy util for windows, downloads a bootstrap file via https
 
 
-## Lokinet core library `(/llarp)` 
+## Session Router public headers `(/include)`
+
+`session_router.h and session-router/*.h`: C headers for embedded Session Router 
+
+`llarp.hpp`: semi-internal C++ header for Session Router executables
+
+
+## Session Router core library `(/llarp)` 
 
 * `/llarp`: contains a few straggling compilation units
 * `/llarp/android`: android platform compat shims
@@ -31,16 +31,16 @@ this codebase is a bit large. this is a high level map of the current code struc
 * `/llarp/ev`: event loop interfaces and implementations 
 * `/llarp/exit`: `.snode` endpoint "backend"
 * `/llarp/handlers`: packet endpoint "frontends"
-* `/llarp/iwp`: "internet wire protocol", hacky homegrown durable udp wire protocol used in lokinet
+* `/llarp/iwp`: "internet wire protocol", hacky homegrown durable udp wire protocol used in Session Router
 * `/llarp/link`: linklayer (node to node) communcation subsystem
 * `/llarp/messages`: linklayer message parsing and handling 
 * `/llarp/net`: wrappers and helpers for ip addresses / ip ranges / sockaddrs, hides platform specific implemenation details
 * `/llarp/path`: onion routing path logic, both client and relay side, path selection algorithms.
 * `/llarp/peerstats`: deprecated
-* `/llarp/quic`: plainquic shims for quic protocol inside lokinet 
+* `/llarp/quic`: plainquic shims for quic protocol inside Session Router 
 * `/llarp/router`: the relm of the god objects
 * `/llarp/routing`: routing messages (onion routed messages sent over paths), parsing, validation and handler interfaces.
-* `/llarp/rpc`: lokinet zmq rpc server and zmq client for externalizing logic (like with blockchain state and custom `.loki` endpoint orchestration)
+* `/llarp/rpc`: Session Router zmq rpc server and zmq client for externalizing logic (like with blockchain state and custom `.loki` endpoint orchestration)
 * `/llarp/service`: `.loki` endpoint "backend"
 * `/llarp/simulation`: network simulation shims
 * `/llarp/tooling`: network simulation tooling
@@ -53,9 +53,9 @@ this codebase is a bit large. this is a high level map of the current code struc
 
 ### `/llarp/service` / `/llarp/handlers` / `/llarp/exit`
 
-for all codepaths for traffic over lokinet, there is 2 parts, the "frontend" and the "backend".
+for all codepaths for traffic over Session Router, there is 2 parts, the "frontend" and the "backend".
 
-the "backend" is responsible for sending and recieving data inside lokinet using our internal formats via paths, it handles flow management, lookups, timeouts, handover, and all state we have inside lokinet.
+the "backend" is responsible for sending and recieving data inside Session Router using our internal formats via paths, it handles flow management, lookups, timeouts, handover, and all state we have inside session_router.
 
 the "fontend", is a translation layer that takes in IP Packets from the OS, and send it to the backend to go where ever it wants to go, and recieves data from the "backend" and sends it to the OS as an IP Packet.
 
@@ -93,7 +93,7 @@ system layer and packaging related:
 * `/contrib/NetworkManager`
 * `/contrib/apparmor`
 * `/contrib/systemd-resolved`
-* `/contrib/lokinet-resolvconf`
+* `/contrib/session-router-resolvconf`
 * `/contrib/bootstrap`
 
 build shims / ci helpers

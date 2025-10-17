@@ -51,14 +51,14 @@ namespace llarp::link
 
     inline constexpr auto RELAY_INBOUND_IDLE_TIMEOUT = std::max(CLIENT_IDLE_TIMEOUT, RELAY_OUTBOUND_IDLE_TIMEOUT);
 
-    inline const auto RELAY_ALPN = "Lokinet_R"s;
-    inline const auto CLIENT_ALPN = "Lokinet_C"s;
+    inline const auto RELAY_ALPN = "Session_Router_R"s;
+    inline const auto CLIENT_ALPN = "Session_Router_C"s;
 
     // Special ALPN used when bootstrapping; unlike the above, this does not replace any existing
     // connection (e.g. if an already-connected pubkey reconnects) and these connections are not
     // used as general relay or client connections.  This ALPN only supports a single BT stream
     // command, bfetch_rcs, issued from the client to the server.
-    inline const auto BOOTSTRAP_ALPN = "Lokinet_BS"s;
+    inline const auto BOOTSTRAP_ALPN = "Session_Router_BS"s;
     inline const auto BOOTSTRAP_IDLE_TIMEOUT = 10s;
 
     class Manager

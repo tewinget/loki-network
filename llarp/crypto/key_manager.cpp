@@ -24,7 +24,7 @@ namespace llarp
             std::memcpy(key.data(), tmp.data(), 64);
         else if (tmp.starts_with('d') and tmp.ends_with('e'))
         {
-            // Old Lokinet keys were bt-dicts with the key we care about in the 's' key:
+            // Old Session Router keys were bt-dicts with the key we care about in the 's' key:
             oxenc::bt_dict_consumer old{tmp};
             auto oldkey = old.require_span<unsigned char, 64>("s");
             std::memcpy(key.data(), oldkey.data(), 64);
@@ -32,7 +32,7 @@ namespace llarp
         }
         else
             throw std::invalid_argument{
-                "Invalid key file {} ({}B): Expected 64 bytes, 128 hex, or legacy lokinet key file"_format(
+                "Invalid key file {} ({}B): Expected 64 bytes, 128 hex, or legacy Session Router key file"_format(
                     fname, tmp.size())};
 
         if (!key.check_pubkey())

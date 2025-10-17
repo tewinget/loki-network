@@ -19,14 +19,14 @@ namespace llarp::dns
       public:
         virtual ~I_Platform() = default;
 
-        /// Attempts to set lokinet as the DNS server.
+        /// Attempts to set Session Router as the DNS server.
         /// throws if unsupported or fails.
         ///
         ///
         /// \param if_index -- the interface index to which we add the DNS servers, this can be
         /// gotten from the interface name e.g. lokitun0 (Typically tun_endpoint.GetIfName().) and
-        /// then put through if_nametoindex(). \param dns -- the listening address of the lokinet
-        /// DNS server \param global -- whether to set up lokinet for all DNS queries (true) or just
+        /// then put through if_nametoindex(). \param dns -- the listening address of the Session Router
+        /// DNS server \param global -- whether to set up Session Router for all DNS queries (true) or just
         /// .loki & .snode addresses (false).
         virtual void set_resolver(unsigned int if_index, quic::Address dns, bool global) = 0;
     };

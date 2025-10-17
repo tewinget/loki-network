@@ -8,7 +8,7 @@
 
 @interface LLARPPacketTunnel : NEPacketTunnelProvider
 {
-    void* lokinet;
+    void* Session Router;
     llarp_incoming_packet packet_buf[LLARP_APPLE_PACKET_BUF_SIZE];
   @public
     NEPacketTunnelNetworkSettings* settings;
@@ -162,7 +162,7 @@ static void del_default_route(void* ctx)
 - (void)readPackets
 {
     [self.packetFlow readPacketObjectsWithCompletionHandler:^(NSArray<NEPacket*>* packets) {
-      if (lokinet == nil)
+      if (session_router == nil)
           return;
 
       size_t size = 0;
@@ -173,12 +173,12 @@ static void del_default_route(void* ctx)
           size++;
           if (size >= LLARP_APPLE_PACKET_BUF_SIZE)
           {
-              llarp_apple_incoming(lokinet, packet_buf, size);
+              llarp_apple_incoming(session_router, packet_buf, size);
               size = 0;
           }
       }
       if (size > 0)
-          llarp_apple_incoming(lokinet, packet_buf, size);
+          llarp_apple_incoming(session_router, packet_buf, size);
 
       [self readPackets];
     }];
@@ -205,12 +205,12 @@ static void del_default_route(void* ctx)
              .del_default_route = del_default_route},
     };
 
-    lokinet = llarp_apple_init(&conf);
-    if (!lokinet)
+    session_router = llarp_apple_init(&conf);
+    if (!session_router)
     {
         NSError* init_failure = [NSError errorWithDomain:error_domain
                                                     code:500
-                                                userInfo:@{@"Error": @"Failed to initialize lokinet"}];
+                                                userInfo:@{@"Error": @"Failed to initialize Session Router"}];
         NSLog(@"%@", [init_failure localizedDescription]);
         return completionHandler(init_failure);
     }
@@ -269,21 +269,21 @@ static void del_default_route(void* ctx)
                  completionHandler:^(NSError* err) {
                    if (err)
                    {
-                       NSLog(@"Failed to configure lokinet tunnel: %@", err);
+                       NSLog(@"Failed to configure Session Router tunnel: %@", err);
                        return completionHandler(err);
                    }
                    LLARPPacketTunnel* strongSelf = weakSelf;
                    if (!strongSelf)
                        return completionHandler(nil);
 
-                   int start_ret = llarp_apple_start(strongSelf->lokinet, (__bridge void*)strongSelf);
+                   int start_ret = llarp_apple_start(strongSelf->session_router, (__bridge void*)strongSelf);
                    if (start_ret != 0)
                    {
                        NSError* start_failure = [NSError errorWithDomain:error_domain
                                                                     code:start_ret
-                                                                userInfo:@{@"Error": @"Failed to start lokinet"}];
+                                                                userInfo:@{@"Error": @"Failed to start Session Router"}];
                        NSLog(@"%@", start_failure);
-                       lokinet = nil;
+                       session_router = nil;
                        return completionHandler(start_failure);
                    }
 
@@ -299,7 +299,7 @@ static void del_default_route(void* ctx)
                    [strongSelf->dns_tramp startWithUpstreamDns:upstreamdns
                                                       listenIp:dns_tramp_ip
                                                     listenPort:dns_trampoline_port
-                                                        uvLoop:llarp_apple_get_uv_loop(strongSelf->lokinet)
+                                                        uvLoop:llarp_apple_get_uv_loop(strongSelf->session_router)
                                              completionHandler:^(NSError* error) {
                                                if (error)
                                                    NSLog(@"Error starting dns trampoline: %@", error);
@@ -310,10 +310,10 @@ static void del_default_route(void* ctx)
 
 - (void)stopTunnelWithReason:(NEProviderStopReason)reason completionHandler:(void (^)(void))completionHandler
 {
-    if (lokinet)
+    if (session_router)
     {
-        llarp_apple_shutdown(lokinet);
-        lokinet = nil;
+        llarp_apple_shutdown(session_router);
+        session_router = nil;
     }
     completionHandler();
 }
@@ -331,7 +331,7 @@ static void del_default_route(void* ctx)
     // Apple documentation says that setting network settings to nil isn't required before setting
     // it to a new value.  Apple lies: both end up with a routing table that looks exactly the same
     // (from both `netstat -rn` and from everything that happens in `route -n monitor`), but if we
-    // don't call with nil first then everything fails to route to either lokinet *and* clearnet
+    // don't call with nil first then everything fails to route to either Session Router *and* clearnet
     // through the exit, so there is apparently some special magic internal Apple state that
     // actually *does* require the tunnel settings being reset with nil first.
     //
@@ -340,7 +340,7 @@ static void del_default_route(void* ctx)
     [self setTunnelNetworkSettings:nil
                  completionHandler:^(NSError* err) {
                    if (err)
-                       NSLog(@"Failed to clear lokinet tunnel settings: %@", err);
+                       NSLog(@"Failed to clear Session Router tunnel settings: %@", err);
                    LLARPPacketTunnel* strongSelf = weakSelf;
                    if (strongSelf)
                    {
@@ -351,7 +351,7 @@ static void del_default_route(void* ctx)
                                               strongSelf.reasserting = NO;
                                           if (err)
                                               NSLog(
-                                                  @"Failed to reconfigure lokinet tunnel settings: "
+                                                  @"Failed to reconfigure Session Router tunnel settings: "
                                                   @"%@",
                                                   err);
                                         }];

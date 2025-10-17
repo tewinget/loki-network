@@ -1,11 +1,11 @@
-package network.loki.lokinet;
+package network.loki.sessionrouter;
 
 import java.nio.ByteBuffer;
 
-public class LokinetConfig
+public class SessionRouterConfig
 {
   static {
-    System.loadLibrary("lokinet-android");
+    System.loadLibrary("session-router-android");
   }
 
   private static native ByteBuffer Obtain(String dataDir);
@@ -22,7 +22,7 @@ public class LokinetConfig
   
   private final ByteBuffer impl;
 
-  public LokinetConfig(String dataDir)
+  public SessionRouterConfig(String dataDir)
   {
     impl = Obtain(dataDir);
     if(impl == null)

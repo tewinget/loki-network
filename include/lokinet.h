@@ -1,8 +1,8 @@
 #pragma once
 
-#include "lokinet/addr.h"
-#include "lokinet/context.h"
-#include "lokinet/misc.h"
-#include "lokinet/srv.h"
-#include "lokinet/stream.h"
-#include "lokinet/udp.h"
+#include "session_router/addr.h"
+#include "session_router/context.h"
+#include "session_router/misc.h"
+#include "session_router/srv.h"
+#include "session_router/stream.h"
+#include "session_router/udp.h"

@@ -34,7 +34,7 @@
 #include <exception>
 #include <ranges>
 
-#ifndef LOKINET_EMBEDDED_ONLY
+#ifndef SROUTER_EMBEDDED_ONLY
 #include <llarp/rpc/oxend_rpc.hpp>
 #endif
 
@@ -363,8 +363,8 @@ namespace llarp::link
 
     void Manager::handle_path_resolve_sns(std::span<const std::byte> body, std::function<void(std::string)> respond)
     {
-#ifdef LOKINET_EMBEDDED_ONLY
-        throw std::logic_error{"This lokinet is not a service node!"};
+#ifdef SROUTER_EMBEDDED_ONLY
+        throw std::logic_error{"This Session Router is not a service node!"};
 #else
         log::trace(logcat, "Received request to publish client contact!");
 

@@ -143,7 +143,7 @@ namespace llarp
                 size_t s = std::min(chunk_size, pending_buffer.size() - written);
                 if (bufferevent_write(_bev, cur, s) != 0)
                 {
-                    // FIXME: if hypothetically quic/lokinet stream is finished sending,
+                    // FIXME: if hypothetically quic/Session Router stream is finished sending,
                     // so this is the last call of this callback, but socket is blocked, not
                     // letting us write the last chunk(s) buffered, what to do?
                     break;

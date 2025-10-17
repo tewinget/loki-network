@@ -634,7 +634,7 @@ namespace llarp::handlers
 
         if (*remaining == 0)
         {
-            log::warning(logcat, "Unable to resolve Lokinet SNS {}: we have no active paths", sns);
+            log::warning(logcat, "Unable to resolve Session Router SNS {}: we have no active paths", sns);
             func(std::nullopt);
         }
     }

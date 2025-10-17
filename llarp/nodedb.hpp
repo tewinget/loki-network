@@ -83,7 +83,7 @@ namespace llarp
 
         /** RouterID mappings
             Both the following are populated in NodeDB startup with RouterID's stored on disk.
-            - known_rids: meant to persist between lokinet sessions, and is only
+            - known_rids: meant to persist between Session Router sessions, and is only
               populated during startup and RouterID fetching. This is meant to represent the
               client instance's most recent perspective of the network, and record which RouterID's
               were recently "active" and connected to

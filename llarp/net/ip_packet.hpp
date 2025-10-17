@@ -23,11 +23,11 @@ namespace llarp
 
     /** IPPacket
         This class encapsulates the functionalities and attributes required for data transmission between the local
-        lokinet instance and the surrounding IP landscape. As data enters lokinet from the device/internet/etc, it is
-        transmitted across the network as a quic::Packet via QUIC. As it exits lokinet to the device/internet/etc, it
+        Session Router instance and the surrounding IP landscape. As data enters Session Router from the device/internet/etc, it is
+        transmitted across the network as a quic::Packet via QUIC. As it exits Session Router to the device/internet/etc, it
         is constructed into an IPPacket.
 
-        This allows for necessary functionalities at the junction that data is entering and exiting the local lokinet
+        This allows for necessary functionalities at the junction that data is entering and exiting the local Session Router
         instance. For example
 
     */

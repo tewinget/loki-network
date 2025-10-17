@@ -29,7 +29,7 @@ from top to bottom the new layers are:
 ## Platform Layer
 
 this is the top layer, it is responsibile ONLY to act as a handler of reading data from the "user" (via tun interface or whatever) to forward to the flow layer as desired, and to take data from the flow layer and send it to the "user".
-any kind of IP/dns mapping or traffic isolation details are done here. embedded lokinet would be implemented in this layer as well, as it is without a full tun interface.
+any kind of IP/dns mapping or traffic isolation details are done here. embedded Session Router would be implemented in this layer as well, as it is without a full tun interface.
 
 Platform layer PDU are what the OS gives us and we internally convert them into flow layer PDU and hand them off to the flow layer.
 
@@ -44,7 +44,7 @@ the flow layer requests from the layer below to make new paths if it wishes to g
 this layer will recieve routing layer PDU from the routing layer and apply any congestion control needed to buffer things to the os if it is needed at all.
 
 flow layer PDU are (data, ethertype, src-pubkey, dst-pubkey, isolation-metric) tuples.
-data is the datum we are tunneling over lokinet. ethertype tells us what kind of datum this is, e.g. plainquic/ipv4/ipv6/auth/etc.
+data is the datum we are tunneling over session_router. ethertype tells us what kind of datum this is, e.g. plainquic/ipv4/ipv6/auth/etc.
 src-pubkey and dst-pubkey are public the ed25519 public keys of each end of the flow in use.
 the isolation metric is a piece of metadata we use to distinguish unique flows (convotag). in this new seperation convotags explicitly do not hand over across paths.
 
@@ -54,7 +54,7 @@ the isolation metric is a piece of metadata we use to distinguish unique flows (
 this layer is tl;dr meant for path management but not path building.
 
 the routing layer is responsible for sending/recieving flow layer PDU, DHT requests/responses, latency testing PDU and any other kind of PDU we send/recieve over the onion layer.
-this layer will be responsible for managing paths we have already built across lokinet.
+this layer will be responsible for managing paths we have already built across session_router.
 the routing layer will periodically measure path status/latency, and do any other kinds of perioidic path related tasks post build.
 this layer when asked for a new path from the flow layer will use one that has been prebuilt already and if the number of prebuilt paths is below a threshold we will tell the onion layer to build more paths.
 the routing layer will recieve path build results be their success/fail/timeout from the onion layer that were requested and apply any congestion control needed at the pivot router.

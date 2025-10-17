@@ -6,7 +6,7 @@
 
 namespace llarp::controller
 {
-    size_t lokinet_instance::next_id = 0;
+    size_t session_router_instance::next_id = 0;
 
     rpc_controller::rpc_controller() : _omq{std::make_shared<omq::OxenMQ>()} {}
 
@@ -14,7 +14,7 @@ namespace llarp::controller
     {
         log::info(
             logcat,
-            "Instructing lokinet instance (bind:{}) to initiate session to remote:{}",
+            "Instructing Session Router instance (bind:{}) to initiate session to remote:{}",
             src.full_address(),
             remote);
 
@@ -42,7 +42,7 @@ namespace llarp::controller
 
     void rpc_controller::_status(omq::address src)
     {
-        log::info(logcat, "Querying lokinet instance (bind:{}) for router status", src.full_address());
+        log::info(logcat, "Querying Session Router instance (bind:{}) for router status", src.full_address());
 
         if (auto it = _binds.find(src); it != _binds.end())
             _omq->request(it->second.cid, "llarp.status", [&](bool success, std::vector<std::string> data) {
@@ -62,7 +62,7 @@ namespace llarp::controller
     void rpc_controller::_close(omq::address src, std::string remote)
     {
         log::info(
-            logcat, "Querying lokinet instance (bind:{}) to close session to remote:{}", src.full_address(), remote);
+            logcat, "Querying Session Router instance (bind:{}) to close session to remote:{}", src.full_address(), remote);
 
         nlohmann::json req;
         req["pk"] = remote;
@@ -88,7 +88,7 @@ namespace llarp::controller
 
     void rpc_controller::_halt(omq::address src)
     {
-        log::info(logcat, "Instructing lokinet instance (bind:{}) to halt", src.full_address());
+        log::info(logcat, "Instructing Session Router instance (bind:{}) to halt", src.full_address());
 
         if (auto it = _binds.find(src); it != _binds.end())
         {
@@ -128,7 +128,7 @@ namespace llarp::controller
                     connect_proms[idx].set_value(false);
                 });
 
-            auto it = _binds.emplace(bind, lokinet_instance{cid}).first;
+            auto it = _binds.emplace(bind, session_router_instance{cid}).first;
             _indexes.emplace(it->second.ID, it->first);
             i += 1;
         }
@@ -149,7 +149,7 @@ namespace llarp::controller
 
     void rpc_controller::list_all() const
     {
-        auto msg = "\n\n\tLokinet RPC controller connected to {} RPC binds:\n"_format(_binds.size());
+        auto msg = "\n\n\tSession Router RPC controller connected to {} RPC binds:\n"_format(_binds.size());
         for (auto& [idx, addr] : _indexes)
             msg += "\t\tID:{} | Address:{}\n"_format(idx, addr.full_address());
 

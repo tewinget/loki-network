@@ -30,7 +30,7 @@ namespace llarp
         - "p" : 32-byte router pubkey (Ed25519)
         - "t" : timestamp when this RC record was created (which also implicitly determines when it
                 goes stale and when it expires).
-        - "v" : lokinet version of the router; this is a three-byte packed value of
+        - "v" : Session Router version of the router; this is a three-byte packed value of
                 MAJOR, MINOR, PATCH, e.g. \x00\x0a\x03 for 0.10.3.
         - "~" : signature of all of the previous serialized data, signed by "p", and *must* be the
                 last item in the dict.
@@ -38,14 +38,14 @@ namespace llarp
     struct RelayContact
     {
         /// The RC version.  Changing this means the RC will not be accepted by any previous
-        /// versions of Lokinet.
+        /// versions of Session Router.
         static constexpr uint8_t VERSION{0};
 
         /// Unit tests disable this to allow private IP ranges in RCs, which normally get rejected.
         inline static bool BLOCK_BOGONS{true};
 
         /// Maximum permitted RC size.  This is considerably larger than needed to allow future
-        /// versions to add various fields without breaking the ability for existing lokinet
+        /// versions to add various fields without breaking the ability for existing Session Router
         /// versions to handle the RC (for example: a ML-KEM-1024 PQC key is 1568 bytes).
         static constexpr size_t MAX_RC_SIZE{2048};
 
@@ -85,7 +85,7 @@ namespace llarp
         std::chrono::sys_seconds _timestamp{};
         NetID _netid = NetID::MAINNET;
 
-        // Lokinet version at the time the RC was produced
+        // Session Router version at the time the RC was produced
         std::array<uint8_t, 3> _router_version;
 
         // Contains the full bt-encoded payload of the RC.

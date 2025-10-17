@@ -8,7 +8,7 @@ namespace llarp
 namespace llarp::sys
 {
 
-    // what state lokinet will report we are in to the system layer
+    // what state Session Router will report we are in to the system layer
     enum class ServiceState
     {
         Initial,
@@ -36,7 +36,7 @@ namespace llarp::sys
         /// disable all reporting to system layer
         inline void disable() { m_disable = true; }
 
-        /// give our current lokinet context to the system layer manager
+        /// give our current Session Router context to the system layer manager
         inline void give_context(llarp::Context* ctx) { m_Context = ctx; }
 
         /// system told us to enter this state

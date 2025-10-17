@@ -8,7 +8,7 @@
 //
 
 // clang-format off
-#define lokinet_VERSION @lokinet_VERSION_MAJOR@, @lokinet_VERSION_MINOR@, @lokinet_VERSION_PATCH@, 0
+#define session_router_VERSION @session_router_VERSION_MAJOR@, @session_router_VERSION_MINOR@, @session_router_VERSION_PATCH@, 0
 
 #ifdef __GNUC__ // make windows rc accept this
 #include <winresrc.h>
@@ -53,8 +53,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION lokinet_VERSION
- PRODUCTVERSION lokinet_VERSION
+ FILEVERSION session_router_VERSION
+ PRODUCTVERSION session_router_VERSION
  FILEFLAGSMASK 0x17L
 #ifdef _DEBUG
  FILEFLAGS 0x3L
@@ -71,13 +71,13 @@ BEGIN
         BEGIN
             VALUE "Comments", "This comment has invoked its 5th ammendment constitutional right to remain silent"
             VALUE "CompanyName", "OPTF"
-            VALUE "FileDescription", "LokiNET daemon for Windows"
-            VALUE "FileVersion", "@lokinet_VERSION@"
-            VALUE "InternalName", "lokinet"
+            VALUE "FileDescription", "Session Router daemon for Windows"
+            VALUE "FileVersion", "@session_router_VERSION@"
+            VALUE "InternalName", "session-router"
             VALUE "LegalCopyright", "Copyright (c) 2018-2022 Jeff Becker, Rick V for the OPTF. This software is provided under the terms of the GPL3; see the file LICENSE for details."
-            VALUE "OriginalFilename", "@lokinet_EXE_NAME@"
-            VALUE "ProductName", "LokiNET for Windows"
-            VALUE "ProductVersion", "@lokinet_VERSION@"
+            VALUE "OriginalFilename", "@session_router_EXE_NAME@"
+            VALUE "ProductName", "Session Router for Windows"
+            VALUE "ProductVersion", "@session_router_VERSION@"
         END
     END
     BLOCK "VarFileInfo"

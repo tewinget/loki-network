@@ -21,7 +21,7 @@
 
 #include <chrono>
 
-#ifndef LOKINET_EMBEDDED_ONLY
+#ifndef SROUTER_EMBEDDED_ONLY
 #include <llarp/handlers/tun.hpp>
 #include <llarp/rpc/oxend_rpc.hpp>
 #include <llarp/rpc/rpc_server.hpp>
@@ -55,7 +55,7 @@ namespace llarp
           _contact_db{std::make_unique<ContactDB>(*this)},
           _last_tick{llarp::time_now_ms()}
     {
-#ifndef LOKINET_EMBEDDED_ONLY
+#ifndef SROUTER_EMBEDDED_ONLY
         // Not actually shared, but unique_ptr would require destructor visibility which
         // embedded-only won't have:
         _omq = std::make_shared<oxenmq::OxenMQ>();
@@ -200,7 +200,7 @@ namespace llarp
 
         nlohmann::json stats{
             {"running", true},
-            {"version", llarp::LOKINET_VERSION_FULL},
+            {"version", llarp::SROUTER_VERSION_FULL},
             {"uptime", to_json(Uptime())},
             // {"numPathsBuilt", pathsCount},
             // {"numPeersConnected", peers},
@@ -225,7 +225,7 @@ namespace llarp
         if (_tun)
             _tun->start_poller();
 
-#ifndef LOKINET_EMBEDDED_ONLY
+#ifndef SROUTER_EMBEDDED_ONLY
         if (!embedded())
             _service_stat_ticker = _loop->call_every(
                 SERVICE_MANAGER_REPORT_INTERVAL, []() { sys::service_manager->report_periodic_stats(); });
@@ -235,7 +235,7 @@ namespace llarp
         _contact_db->start_tickers();
         _link_endpoint->start_tickers();
 
-#ifndef LOKINET_EMBEDDED_ONLY
+#ifndef SROUTER_EMBEDDED_ONLY
         if (is_service_node)
         {
             _oxend->start_pings();
@@ -272,7 +272,7 @@ namespace llarp
     void Router::fetch_snode_keys()
     {
         assert(is_service_node);
-#ifndef LOKINET_EMBEDDED_ONLY
+#ifndef SROUTER_EMBEDDED_ONLY
 
         our_rc_file = _config.router.data_dir / our_rc_filename;
 
@@ -330,7 +330,7 @@ namespace llarp
             log::clear_sinks();
             log::add_sink(
                 log_type,
-                log_type == log::Type::System ? "lokinet" : _config.logging.file
+                log_type == log::Type::System ? "session-router" : _config.logging.file
 #ifndef NDEBUG
                 ,
                 debug_pattern
@@ -345,7 +345,7 @@ namespace llarp
                 log::set_level(log_global, log::Level::info);
         });
 
-#ifndef LOKINET_EMBEDDED_ONLY
+#ifndef SROUTER_EMBEDDED_ONLY
         // re-add rpc log sink if rpc enabled, else free it
         if (_config.api.enable_rpc_server and llarp::logRingBuffer)
             log::add_sink(llarp::logRingBuffer, llarp::log::DEFAULT_PATTERN_MONO);
@@ -440,7 +440,7 @@ namespace llarp
             }
 
             if (_listen_address == *_public_address)
-                log::info(logcat, "Using {} for Lokinet communications", _listen_address);
+                log::info(logcat, "Using {} for Session Router communications", _listen_address);
             else if (!_listen_address.is_public())
                 log::info(
                     logcat,
@@ -457,7 +457,7 @@ namespace llarp
 
             log::info(
                 log_global,
-                "Lokinet relay listening on {}{}",
+                "Session Router relay listening on {}{}",
                 _listen_address,
                 _public_address ? " with public address {}"_format(*_public_address) : "");
         }
@@ -470,7 +470,7 @@ namespace llarp
             if (_config.links.listen_addr && embedded())
                 _listen_address.set_port(0);
 
-            log::info(log_global, "Lokinet client connection using {}", _listen_address);
+            log::info(log_global, "Session Router client connection using {}", _listen_address);
         }
 
         RelayContact::BLOCK_BOGONS = _config.router.block_bogons;
@@ -491,7 +491,7 @@ namespace llarp
                 else
                     throw std::runtime_error("cannot find free IPv4 address range!");
             }
-            log::info(logcat, "Lokinet IPv4 local network is {}", *netconf._local_ip_net);
+            log::info(logcat, "Session Router IPv4 local network is {}", *netconf._local_ip_net);
 
             if (netconf.enable_ipv6)
             {
@@ -503,10 +503,10 @@ namespace llarp
                     else
                         throw std::runtime_error("cannot find free IPv6 address range!");
                 }
-                log::info(logcat, "Lokinet IPv6 local network is {}", *netconf._local_ipv6_net);
+                log::info(logcat, "Session Router IPv6 local network is {}", *netconf._local_ipv6_net);
                 log::warning(
                     logcat,
-                    "Lokinet IPv6 support is a work-in-progress and unsupported; enabling it is not recommended");
+                    "Session Router IPv6 support is a work-in-progress and unsupported; enabling it is not recommended");
             }
 
             // Make sure any reserved addresses are within our local network range:
@@ -553,14 +553,14 @@ namespace llarp
     void Router::configure()
     {
         log::trace(logcat, "{} called", __PRETTY_FUNCTION__);
-#ifndef LOKINET_EMBEDDED_ONLY
+#ifndef SROUTER_EMBEDDED_ONLY
         if (!embedded())
             sys::service_manager->starting();
 #endif
 
         if (_is_exit_node and is_service_node)
             throw std::runtime_error{
-                "Lokinet cannot simultaneously operate as a service node and client-operated exit node service!"};
+                "Session Router cannot simultaneously operate as a service node and client-operated exit node service!"};
 
         if (_config.lokid.disable_testing && netid() == NetID::MAINNET)
             throw std::runtime_error{"Error: reachability testing can only be disabled on testnet!"};
@@ -570,9 +570,9 @@ namespace llarp
 
         log::trace(logcat, "Configuring router...");
 
-        log::info(log_global, "Operating as a Lokinet {}", is_service_node ? "relay (service node)" : "client");
+        log::info(log_global, "Operating as a Session Router {}", is_service_node ? "relay (service node)" : "client");
 
-#ifndef LOKINET_EMBEDDED_ONLY
+#ifndef SROUTER_EMBEDDED_ONLY
         if (is_service_node)
         {
             log::debug(logcat, "Starting oxend RPC client");
@@ -609,7 +609,7 @@ namespace llarp
 
         _node_db = std::make_unique<NodeDB>(*this);
 
-#ifndef LOKINET_EMBEDDED_ONLY
+#ifndef SROUTER_EMBEDDED_ONLY
         if (is_service_node)
         {
             // Wait, synchronously, for the oxend SN list update, for up to 10s.  If we still don't
@@ -647,16 +647,16 @@ namespace llarp
 
         if (!embedded())
         {
-#ifdef LOKINET_EMBEDDED_ONLY
-            log::critical(logcat, "This lokinet build only supports embedded configurations!");
-            throw std::runtime_error{"This lokinet build only supports embedded configurations!"};
+#ifdef SROUTER_EMBEDDED_ONLY
+            log::critical(logcat, "This Session Router build only supports embedded configurations!");
+            throw std::runtime_error{"This Session Router build only supports embedded configurations!"};
 #else
             log::debug(logcat, "Initializing TUN device");
             auto tun = _loop->make_shared<handlers::TunEndpoint>(*this);
             tun->setup_dns();
 
             log::info(
-                log_global, "Lokinet internal network: {} on device {}", tun->get_ipv4_network(), tun->get_if_name());
+                log_global, "Session Router internal network: {} on device {}", tun->get_ipv4_network(), tun->get_if_name());
 
             _tun = std::move(tun);
 #endif
@@ -678,7 +678,7 @@ namespace llarp
         // If we're in the registered list then we *should* be establishing connections to other
         // routers, so if we have almost no peers then something is almost certainly wrong.
         if (insufficient_peers() and not _config.lokid.disable_testing)
-            return "too few peer connections; lokinet is not adequately connected to the network";
+            return "too few peer connections; Session Router is not adequately connected to the network";
         return std::nullopt;
     }
 
@@ -770,13 +770,13 @@ namespace llarp
     std::string Router::status_line()
     {
         auto now = llarp::time_now_ms();
-        return "v{} {}: {}"_format(llarp::LOKINET_VERSION_FULL, is_service_node ? "relay" : "client", _stats_line(now));
+        return "v{} {}: {}"_format(llarp::SROUTER_VERSION_FULL, is_service_node ? "relay" : "client", _stats_line(now));
     }
 
     void Router::_relay_tick([[maybe_unused]] std::chrono::milliseconds now)
     {
         assert(_config.relay());
-#ifndef LOKINET_EMBEDDED_ONLY
+#ifndef SROUTER_EMBEDDED_ONLY
         log::trace(logcat, "{} called", __PRETTY_FUNCTION__);
 
         if (should_report_stats(now))
@@ -920,7 +920,7 @@ namespace llarp
         start_tickers();
         _is_running = true;
 
-#ifndef LOKINET_EMBEDDED_ONLY
+#ifndef SROUTER_EMBEDDED_ONLY
         if (!embedded())
             llarp::sys::service_manager->ready();
 #endif
@@ -1019,7 +1019,7 @@ namespace llarp
         {
             _is_connected = false;
 
-            log::warning(log_global, "Lokinet is no longer connected to the network!");
+            log::warning(log_global, "Session Router is no longer connected to the network!");
 
             process_on_conn_callbacks(_on_disconnected, "on_disconnected");
         }
@@ -1032,7 +1032,7 @@ namespace llarp
 
             log::info(
                 log_global,
-                "Lokinet is now connected to the network ({}) with {}/{} relay connections",
+                "Session Router is now connected to the network ({}) with {}/{} relay connections",
                 config().network.is_reachable ? id().to_network_address(false).to_string() : "outgoing-only",
                 conns,
                 config().paths.edge_connections);
@@ -1043,7 +1043,7 @@ namespace llarp
 
     void Router::on_test_ping()
     {
-#ifndef LOKINET_EMBEDDED_ONLY
+#ifndef SROUTER_EMBEDDED_ONLY
         _router_testing->incoming_ping();
 #endif
     }
@@ -1065,7 +1065,7 @@ namespace llarp
             return;  // Lost a race with something else trying to stop
 
         _loop->call([this] {
-#ifndef LOKINET_EMBEDDED_ONLY
+#ifndef SROUTER_EMBEDDED_ONLY
             if (!embedded())
             {
                 log::debug(logcat, "stopping service manager...");
@@ -1121,13 +1121,13 @@ namespace llarp
             _omq.reset();
 
             _close_promise.set_value();
-            log::info(log_global, "Lokinet has stopped");
+            log::info(log_global, "Session Router has stopped");
         });
     }
 
     const llarp::net::Platform* Router::net() const
     {
-#ifndef LOKINET_EMBEDDED_ONLY
+#ifndef SROUTER_EMBEDDED_ONLY
         if (!embedded())
             return llarp::net::Platform::Default_ptr();
 #endif

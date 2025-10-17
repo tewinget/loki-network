@@ -1,6 +1,6 @@
-If you are reading this to try to build Lokinet for yourself for an Apple operating system and
+If you are reading this to try to build Session Router for yourself for an Apple operating system and
 simultaneously care about open source, privacy, or freedom then you, my friend, are a walking
-contradiction: you are trying to get Lokinet to work on a platform that actively despises open
+contradiction: you are trying to get Session Router to work on a platform that actively despises open
 source, privacy, and freedom.  Even Windows is a better choice in all of these categories than
 Apple.
 
@@ -19,15 +19,15 @@ to pay money first to get a team account (a personal account will not work), and
 resulting binaries to only run on individually selected Apple computers selected at the time the
 profile is provisioned (with no ability to allow it to run anywhere).
 
-    lokinet.dev.provisionprofile
-    lokinet-extension.dev.provisionprofile
+    session_router.dev.provisionprofile
+    session-router-extension.dev.provisionprofile
 
 This is actively hostile to open source development, but that is nothing new for Apple.
 
 There are also release provisioning profiles
 
-    lokinet.release.provisionprofile
-    lokinet-extension.release.provisionprofile
+    session_router.release.provisionprofile
+    session-router-extension.release.provisionprofile
 
 These ones allow distribution of the app, but only if notarized, and again require notarization plus
 signing by a (paid) Apple developer account.
@@ -37,12 +37,12 @@ In order to make things work, you'll have to replace these provisioning profiles
 team/application/bundle IDs to reference your own team, matching the provisioning profiles.  The dev
 provisioning profiles must be a "macOS Development" provisioning profile, and must include the
 signing keys and the authorized devices on which you want to run it.  (The profiles bundled in this
-repository contains the lokinet team's "Apple Development" keys associated with the Oxen project,
+repository contains the Session Router team's "Apple Development" keys associated with the Session project,
 and mac dev boxes.  This is *useless* for anyone else).
 
 For release builds, you still need a provisioning profile, but it must be a "Distribution: Developer
 ID" provisioning profile, and are tied to a (paid) Developer ID.  The ones in the repository are
-attached to the Oxen Project Developer ID and are useless to anyone else.
+attached to the Session Project Developer ID and are useless to anyone else.
 
 Once you have that in place, you need to build and sign the package using a certificate matching
 your provisioning profile before your Apple system will allow it to run.  (That's right, your $2000
@@ -50,9 +50,9 @@ box won't let you run programs you build from source on it unless you also subsc
 Apple developer account).
 
 Okay, so now that you have paid Apple more money for the privilege of using your own computer,
-here's how you make a signed lokinet app:
+here's how you make a signed Session Router app:
 
-1) Decide which type of build you are doing: a lokinet system extension, or an app extension.  The
+1) Decide which type of build you are doing: a Session Router system extension, or an app extension.  The
    former must be signed and notarized and will only work when placed in the /Applications folder,
    but will not work as a dev build and cannot be distributed outside the Mac App Store.  The latter
    is usable as a dev build, but still requires a signature and Apple-provided provisioningprofile
@@ -97,7 +97,7 @@ here's how you make a signed lokinet app:
       account device-specific login credentials provided by Apple.
 
    To make your life easier, stash these settings into a `~/.notarization.cmake` file inside your
-   home directory; if you have not specified them in the build, and this file exists, lokinet's
+   home directory; if you have not specified them in the build, and this file exists, Session Router's
    cmake will load it:
 
           set(MACOS_NOTARIZE_USER "me@example.com")
@@ -118,6 +118,6 @@ here's how you make a signed lokinet app:
    build directory (or alternatively `ninja notarize`, but the former gives you status output while
    it runs).
 
-5) Packaging the app: you want to use `-DLOKINET_PACKAGE=ON` when configuring with cmake and then,
+5) Packaging the app: you want to use `-DSROUTER_PACKAGE=ON` when configuring with cmake and then,
    once all signing and notarization is complete, run `cpack` which will give you a .dmg and a .zip
    containing the release.

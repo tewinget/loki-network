@@ -8,12 +8,12 @@ let app = NSApplication.shared
 let START = "--start"
 let STOP = "--stop"
 
-let HELP_STRING = "usage: lokinet {--start|--stop}"
+let HELP_STRING = "usage: session-router {--start|--stop}"
 
-class LokinetMain: NSObject, NSApplicationDelegate {
+class SessionRouterMain: NSObject, NSApplicationDelegate {
     var vpnManager = NETunnelProviderManager()
     var mode = START
-    let netextBundleId = "org.lokinet.network-extension"
+    let netextBundleId = "org.session.network-extension"
 
     func applicationDidFinishLaunching(_: Notification) {
         if mode == START {
@@ -31,12 +31,12 @@ class LokinetMain: NSObject, NSApplicationDelegate {
 
     func result(msg: String) {
         NSLog(msg)
-        // TODO: does lokinet continue after this?
+        // TODO: does Session Router continue after this?
         bail()
     }
 
     func tearDownVPNTunnel() {
-        NSLog("Stopping Lokinet")
+        NSLog("Stopping Session Router")
         NETunnelProviderManager.loadAllFromPreferences { [self] (savedManagers: [NETunnelProviderManager]?, error: Error?) in
             if let error = error {
                 self.result(msg: error.localizedDescription)
@@ -47,17 +47,17 @@ class LokinetMain: NSObject, NSApplicationDelegate {
                 for manager in savedManagers {
                     if (manager.protocolConfiguration as? NETunnelProviderProtocol)?.providerBundleIdentifier == self.netextBundleId {
                         manager.connection.stopVPNTunnel()
-                        self.result(msg: "Lokinet Down")
+                        self.result(msg: "Session Router Down")
                     }
                 }
             }
-            self.result(msg: "Lokinet is not up")
+            self.result(msg: "Session Router is not up")
         }
     }
 
     func startNetworkExtension() {
         #if MACOS_SYSTEM_EXTENSION
-            NSLog("Loading Lokinet network extension")
+            NSLog("Loading Session Router network extension")
             // Start by activating the system extension
             let activationRequest = OSSystemExtensionRequest.activationRequest(forExtensionWithIdentifier: netextBundleId, queue: .main)
             activationRequest.delegate = self
@@ -68,7 +68,7 @@ class LokinetMain: NSObject, NSApplicationDelegate {
     }
 
     func setupVPNTunnel() {
-        NSLog("Starting up Lokinet tunnel")
+        NSLog("Starting up Session Router tunnel")
         NETunnelProviderManager.loadAllFromPreferences { [self] (savedManagers: [NETunnelProviderManager]?, error: Error?) in
             if let error = error {
                 self.result(msg: error.localizedDescription)
@@ -96,7 +96,7 @@ class LokinetMain: NSObject, NSApplicationDelegate {
             self.vpnManager.protocolConfiguration = providerProtocol
             self.vpnManager.isEnabled = true
             // self.vpnManager.isOnDemandEnabled = true
-            self.vpnManager.localizedDescription = "lokinet"
+            self.vpnManager.localizedDescription = "session-router"
             self.vpnManager.saveToPreferences(completionHandler: { [self] error -> Void in
                 if error != nil {
                     NSLog("Error saving to preferences")
@@ -150,13 +150,13 @@ class LokinetMain: NSObject, NSApplicationDelegate {
 
 #if MACOS_SYSTEM_EXTENSION
 
-    extension LokinetMain: OSSystemExtensionRequestDelegate {
+    extension SessionRouterMain: OSSystemExtensionRequestDelegate {
         func request(_: OSSystemExtensionRequest, didFinishWithResult result: OSSystemExtensionRequest.Result) {
             guard result == .completed else {
                 NSLog("Unexpected result %d for system extension request", result.rawValue)
                 return
             }
-            NSLog("Lokinet system extension loaded")
+            NSLog("Session Router system extension loaded")
             setupVPNTunnel()
         }
 
@@ -184,36 +184,36 @@ let args = CommandLine.arguments
 
 // If we are invoked with no arguments then exec the gui.  This is dumb, but there doesn't seem to
 // be a nicer way to do this on Apple's half-baked platform because:
-// - we have three "bundles" we need to manage: the GUI app, the system extension, and the Lokinet
+// - we have three "bundles" we need to manage: the GUI app, the system extension, and the Session Router
 //   app (this file) which loads the system extension.
 // - if we embed the system extension directly inside the GUI then it fails to launch because the
 //   electron GUI's requirements (needed for JIT) conflict with the ability to load a system
 //   extensions.
-// - if we embed Lokinet.app inside Lokinet-GUI.app and then the system extension inside Lokinet.app
+// - if we embed SessionRouter.app inside Session-Router-GUI.app and then the system extension inside SessionRouter.app
 //   then it works, but macos loses track of the system extension and doesn't remove it when you
 //   remove the application.  (It breaks your system, leaving an impossible-to-remove system
 //   extension, in just the same way it breaks if you don't use Finder to remove the Application.
 //   Apple used to say (around 2 years ago as of writing) that they would fix this situation "soon",
 //   but hasn't, and has stopped saying anything about it.)
 // - if we try to use multiple executables (one to launch the system extension, one simple shell
-//   script to execs the embedded GUI app) inside the Lokinet.app and make the GUI the default for
-//   the application then Lokinet gets killed by gatekeeper because code signing only applies the
+//   script to execs the embedded GUI app) inside the Session_Router.app and make the GUI the default for
+//   the application then Session Router gets killed by gatekeeper because code signing only applies the
 //   (required-for-system-extensions) provisioningprofile to the main binary in the app.
 //
 // So we are left needing *one* single binary that isn't the GUI but has to do double-duty for both
-// exec'ing the binary and loading lokinet, depending on how it is called.
+// exec'ing the binary and loading Session Router, depending on how it is called.
 //
 // But of course there is no way to specify command-line arguments to the default binary macOS runs,
 // so we can't use a `--gui` flag or anything so abhorrent to macos purity, thus this nasty
 // solution:
 //   - no args -- exec the GUI
-//   - `--start` -- load the system extension and start lokinet
-//   - `--stop` -- stop lokinet
+//   - `--start` -- load the system extension and start Session Router
+//   - `--stop` -- stop Session Router
 //
 // macOS: land of half-baked implementations and nasty hacks to make anything work.
 
 if args.count == 1 {
-    let gui_path = Bundle.main.resourcePath! + "/../Helpers/Lokinet-GUI.app"
+    let gui_path = Bundle.main.resourcePath! + "/../Helpers/Session-Router-GUI.app"
     if !FileManager.default.fileExists(atPath: gui_path) {
         NSLog("Could not find gui app at %@", gui_path)
         exit(1)
@@ -234,7 +234,7 @@ if args.count == 1 {
     group.wait()
 
 } else if args.count == 2 {
-    let delegate = LokinetMain()
+    let delegate = SessionRouterMain()
     delegate.mode = args[1]
     app.delegate = delegate
     app.run()

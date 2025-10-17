@@ -3,13 +3,13 @@
 ## Path Building
 
 <p align="center">
-    <img src="/docs/lokinet_pathbuild_no_steps.png">
+    <img src="/docs/session_router_pathbuild_no_steps.png">
 </p>
 
-Starting from the top, here's a high-level overview of how the lokinet client builds a path to a terminating node
+Starting from the top, here's a high-level overview of how the Session Router client builds a path to a terminating node
 
 1. Client semi-randomly selects SN's for hops 2 and 3 using Introset Hash Ring (IHR)
-   - First hop is sticky: upon initialization of lokinet, 4-5 first hops are selected
+   - First hop is sticky: upon initialization of Session Router, 4-5 first hops are selected
 
 2. Message sent to hop 1
    - Message consists of eight records in a linked list. Four hops are typically used, leaving the last 4 links as dummy records

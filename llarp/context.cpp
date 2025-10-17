@@ -34,8 +34,8 @@ namespace llarp
     {
         if (router)
         {
-            log::error(logcat, "Context::start called but Lokinet is already running");
-            throw std::logic_error{"Lokinet is already started"};
+            log::error(logcat, "Context::start called but Session Router is already running");
+            throw std::logic_error{"Session Router is already started"};
         }
         if (loop)
             log::debug(logcat, "Re-using existing loop");
@@ -53,7 +53,7 @@ namespace llarp
         lifetime_waiter = done_promise.get_future();
 
         std::shared_ptr<llarp::vpn::Platform> plat;
-#ifndef LOKINET_EMBEDDED_ONLY
+#ifndef SROUTER_EMBEDDED_ONLY
         if (!embedded)
         {
             log::debug(logcat, "Initializing platform code...");
@@ -109,7 +109,7 @@ namespace llarp
 
     Context::Context(bool embedded) : embedded{embedded}
     {
-#ifndef LOKINET_EMBEDDED_ONLY
+#ifndef SROUTER_EMBEDDED_ONLY
         // service_manager is a global and context isnt
         if (!embedded)
             llarp::sys::service_manager->give_context(this);

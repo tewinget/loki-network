@@ -88,12 +88,12 @@ function(expand_urls output source_file)
 endfunction()
 
 
-add_library(lokinet_static_deps INTERFACE)
+add_library(session_router_static_deps INTERFACE)
 
 function(add_static_target target ext_target libname)
   add_library(${target} STATIC IMPORTED GLOBAL)
   add_dependencies(${target} ${ext_target})
-  target_link_libraries(lokinet_static_deps INTERFACE ${target})
+  target_link_libraries(session_router_static_deps INTERFACE ${target})
   set_target_properties(${target} PROPERTIES
     IMPORTED_LOCATION ${DEPS_DESTDIR}/lib/${libname}
   )
@@ -229,7 +229,7 @@ if(NOT TARGET sodium)
 endif()
 
 
-if(LOKINET_PEERSTATS)
+if(SROUTER_PEERSTATS)
   build_external(sqlite3)
   add_static_target(sqlite3 sqlite3_external libsqlite3.a)
 endif()
@@ -250,7 +250,7 @@ if(NOT TARGET libzstd::static)
 endif()
 
 
-if(LOKINET_FULL)
+if(SROUTER_FULL)
 
   build_external(zlib
     CONFIGURE_COMMAND ${CMAKE_COMMAND} -E env "CC=${deps_cc}" "CFLAGS=${deps_CFLAGS} -fPIC" ${cross_extra} ./configure --prefix=${DEPS_DESTDIR} --static
@@ -320,4 +320,4 @@ if(LOKINET_FULL)
     INTERFACE_LINK_LIBRARIES "${libzmq_link_libs}"
     INTERFACE_COMPILE_DEFINITIONS "ZMQ_STATIC")
 
-endif(LOKINET_FULL)
+endif(SROUTER_FULL)

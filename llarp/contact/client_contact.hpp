@@ -34,7 +34,7 @@ namespace llarp
             - "p" : supported protocols indicating the traffic accepted by the client instance; this indicates if the
                     client is embedded and therefore requires a tunneled connection. Serialized as a bitwise flag of
                     protocol_flag enums (llarp/net/policy.hpp)
-            - "s" : (optional) SRV records for lokinet DNS lookup
+            - "s" : (optional) SRV records for Session Router DNS lookup
     */
     struct ClientContact
     {

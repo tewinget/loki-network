@@ -47,7 +47,7 @@ void* llarp_apple_init(llarp_apple_config* appleconf)
     {
         auto config_dir = std::filesystem::u8path(appleconf->config_dir);
         auto config = std::make_shared<llarp::Config>(config_dir);
-        std::filesystem::path config_path = config_dir / "lokinet.ini";
+        std::filesystem::path config_path = config_dir / "session_router.ini";
         if (!exists(config_path))
             llarp::ensure_config(config_dir, config_path, false, llarp::config::Type::FullClient);
         config->load(config_path);
@@ -71,7 +71,7 @@ void* llarp_apple_init(llarp_apple_config* appleconf)
 
         // TODO: in the future we want to do this properly with our pubkey (see issue #1705), but
         // that's going to take a bit more work because we currently can't *get* the (usually)
-        // ephemeral pubkey at this stage of lokinet configuration.  So for now we just stick our
+        // ephemeral pubkey at this stage of Session Router configuration.  So for now we just stick our
         // IPv4 address into it until #1705 gets implemented.
         llarp::huint128_t ipv6{llarp::uint128_t{0xfd2e'6c6f'6b69'0000, llarp::net::TruncateV6(range.addr).h}};
         std::strncpy(appleconf->tunnel_ipv6_ip, ipv6.to_string().c_str(), sizeof(appleconf->tunnel_ipv6_ip));
@@ -108,14 +108,14 @@ void* llarp_apple_init(llarp_apple_config* appleconf)
     }
     catch (const std::exception& e)
     {
-        oxen::log::error(logcat, "Failed to initialize lokinet from config: {}", e.what());
+        oxen::log::error(logcat, "Failed to initialize Session Router from config: {}", e.what());
     }
     return nullptr;
 }
 
-int llarp_apple_start(void* lokinet, void* callback_context)
+int llarp_apple_start(void* Session Router, void* callback_context)
 {
-    auto* inst = static_cast<instance_data*>(lokinet);
+    auto* inst = static_cast<instance_data*>(Session Router);
 
     inst->context.callback_context = callback_context;
 
@@ -151,24 +151,24 @@ int llarp_apple_start(void* lokinet, void* callback_context)
     }
     catch (const std::exception& e)
     {
-        oxen::log::error(logcat, "Failed to initialize lokinet: {}", e.what());
+        oxen::log::error(logcat, "Failed to initialize Session Router: {}", e.what());
         return -1;
     }
 
     return 0;
 }
 
-uv_loop_t* llarp_apple_get_uv_loop(void* lokinet)
+uv_loop_t* llarp_apple_get_uv_loop(void* Session Router)
 {
-    auto& inst = *static_cast<instance_data*>(lokinet);
+    auto& inst = *static_cast<instance_data*>(Session Router);
     auto uvw = inst.context.loop->MaybeGetUVWLoop();
     assert(uvw);
     return uvw->raw();
 }
 
-int llarp_apple_incoming(void* lokinet, const llarp_incoming_packet* packets, size_t size)
+int llarp_apple_incoming(void* Session Router, const llarp_incoming_packet* packets, size_t size)
 {
-    auto& inst = *static_cast<instance_data*>(lokinet);
+    auto& inst = *static_cast<instance_data*>(Session Router);
 
     auto iface = inst.iface.lock();
     if (!iface)
@@ -188,9 +188,9 @@ int llarp_apple_incoming(void* lokinet, const llarp_incoming_packet* packets, si
     return count;
 }
 
-void llarp_apple_shutdown(void* lokinet)
+void llarp_apple_shutdown(void* Session Router)
 {
-    auto* inst = static_cast<instance_data*>(lokinet);
+    auto* inst = static_cast<instance_data*>(Session Router);
 
     inst->context.CloseAsync();
     inst->context.Wait();

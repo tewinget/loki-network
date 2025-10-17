@@ -17,7 +17,7 @@ namespace llarp
         switch (n)
         {
             case NetID::MAINNET:
-                return "lokinet";
+                return "session-router";
             case NetID::TESTNET:
                 return "testnet";
             default:
@@ -27,7 +27,7 @@ namespace llarp
 
     inline NetID netid_from_string(std::string_view s)
     {
-        if (s == "lokinet")
+        if (s == "session-router")
             return NetID::MAINNET;
         if (s == "testnet")
             return NetID::TESTNET;

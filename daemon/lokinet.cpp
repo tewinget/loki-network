@@ -3,7 +3,7 @@
 #include <llarp/constants/platform.hpp>
 #include <llarp/constants/version.hpp>
 #include <llarp/util/exceptions.hpp>
-#include <llarp/util/lokinet_init.h>
+#include <llarp/util/Session-Router_init.h>
 #include <llarp/util/thread/threading.hpp>
 
 #include <CLI/CLI.hpp>
@@ -51,9 +51,9 @@ namespace
     void uninstall_win32_daemon();
 
     // operational function definitions
-    int lokinet_main(int, char**);
+    int Session-Router_main(int, char**);
     void handle_signal(int sig);
-    static void start_lokinet(std::optional<std::filesystem::path> confFile, bool snode);
+    static void start_Session-Router(std::optional<std::filesystem::path> confFile, bool snode);
 
     // variable declarations
     static auto logcat = llarp::log::Cat("daemon");
@@ -93,7 +93,7 @@ namespace
             perror("Failed to start Windows Sockets");
             return err;
         }
-        ::CreateMutex(nullptr, FALSE, "lokinet_win32_daemon");
+        ::CreateMutex(nullptr, FALSE, "Session-Router_win32_daemon");
         return 0;
     }
 
@@ -124,8 +124,8 @@ namespace
         // Create the service
         schService = CreateService(
             schSCManager,               // SCM database
-            strdup("lokinet"),          // name of service
-            "Lokinet for Windows",      // service name to display
+            strdup("Session-Router"),          // name of service
+            "Session Router for Windows",      // service name to display
             SERVICE_ALL_ACCESS,         // desired access
             SERVICE_WIN32_OWN_PROCESS,  // service type
             SERVICE_DEMAND_START,       // start type
@@ -157,7 +157,7 @@ namespace
         SC_HANDLE schService;
         SERVICE_DESCRIPTION sd;
         LPTSTR szDesc = strdup(
-            "LokiNET is a free, open source, private, "
+            "Session Router is a free, open source, private, "
             "decentralized, \"market based sybil resistant\" "
             "and IP based onion routing network");
         // Get a handle to the SCM database.
@@ -175,7 +175,7 @@ namespace
         // Get a handle to the service.
         schService = OpenService(
             schSCManager,            // SCM database
-            "lokinet",               // name of service
+            "Session-Router",               // name of service
             SERVICE_CHANGE_CONFIG);  // need change config access
 
         if (schService == nullptr)
@@ -222,7 +222,7 @@ namespace
         // Get a handle to the service.
         schService = OpenService(
             schSCManager,  // SCM database
-            "lokinet",     // name of service
+            "Session-Router",     // name of service
             0x10000);      // need delete access
 
         if (schService == nullptr)
@@ -251,7 +251,7 @@ namespace
         const auto flags = (MINIDUMP_TYPE)(MiniDumpWithFullMemory | MiniDumpWithFullMemoryInfo | MiniDumpWithHandleData
                                            | MiniDumpWithUnloadedModules | MiniDumpWithThreadInfo);
 
-        const std::string fname = fmt::format("C:\\ProgramData\\lokinet\\crash-{}.dump", llarp::time_now_ms().count());
+        const std::string fname = fmt::format("C:\\ProgramData\\Session-Router\\crash-{}.dump", llarp::time_now_ms().count());
 
         HANDLE hDumpFile;
         SYSTEMTIME stLocalTime;
@@ -300,7 +300,7 @@ namespace
     {
         // Register the handler function for the service
         auto* svc = dynamic_cast<llarp::sys::SVC_Manager*>(llarp::sys::service_manager);
-        svc->handle = RegisterServiceCtrlHandler("lokinet", SvcCtrlHandler);
+        svc->handle = RegisterServiceCtrlHandler("Session-Router", SvcCtrlHandler);
 
         if (svc->handle == nullptr)
         {
@@ -308,18 +308,18 @@ namespace
             return;
         }
 
-        // we hard code the args to lokinet_main.
-        // we yoink argv[0] (lokinet.exe path) and pass in the new args.
+        // we hard code the args to Session-Router_main.
+        // we yoink argv[0] (Session-Router.exe path) and pass in the new args.
         std::array args = {
             reinterpret_cast<char*>(argv[0]),
-            reinterpret_cast<char*>(strdup("c:\\programdata\\lokinet\\lokinet.ini")),
+            reinterpret_cast<char*>(strdup("c:\\programdata\\Session-Router\\Session-Router.ini")),
             reinterpret_cast<char*>(0)};
-        lokinet_main(args.size() - 1, args.data());
+        Session-Router_main(args.size() - 1, args.data());
     }
 
 #endif
 
-    int lokinet_main(int argc, char** argv)
+    int Session-Router_main(int argc, char** argv)
     {
 #ifdef _WIN32
         if (startWinsock())
@@ -328,14 +328,14 @@ namespace
 #endif
 
         CLI::App cli{
-            "Lokinet is a free, open source, private, decentralized, market-based sybil resistant "
-            "and IP based onion routing network lokinet"};
+            "Session Router is a free, open source, private, decentralized, market-based sybil resistant "
+            "and IP based onion routing network Session-Router"};
         command_line_options options{};
 
         // flags: boolean values in command_line_options struct
-        cli.add_flag("--version", options.version, "Lokinet version");
+        cli.add_flag("--version", options.version, "Session Router version");
         cli.add_flag("-g,--generate", options.generate, "Generate default configuration and exit");
-        cli.add_flag("-r,--router", options.router, "Run lokinet in routing mode instead of client-only mode");
+        cli.add_flag("-r,--router", options.router, "Run Session-Router in routing mode instead of client-only mode");
         cli.add_flag(
             "-e,--generate-embedded",
             options.generate_embedded,
@@ -343,7 +343,7 @@ namespace
         cli.add_flag("-f,--force", options.overwrite, "Force writing config even if file exists");
 
         // options: string
-        cli.add_option("config,--config", options.configPath, "Path to lokinet.ini configuration file")
+        cli.add_option("config,--config", options.configPath, "Path to Session-Router.ini configuration file")
             ->capture_default_str();
 
         if constexpr (llarp::platform::is_windows)
@@ -367,7 +367,7 @@ namespace
         {
             if (options.version)
             {
-                std::cout << llarp::LOKINET_VERSION_FULL << std::endl;
+                std::cout << llarp::SROUTER_VERSION_FULL << std::endl;
                 return 0;
             }
 
@@ -460,11 +460,11 @@ namespace
 
         try
         {
-            start_lokinet(configFile, options.router);
+            start_Session-Router(configFile, options.router);
         }
         catch (const std::exception& e)
         {
-            std::cerr << "\nLokinet failed to start: " << e.what() << "\n\n";
+            std::cerr << "\nSession Router failed to start: " << e.what() << "\n\n";
             return 1;
         }
 
@@ -473,7 +473,7 @@ namespace
             llarp::util::SetThreadName("llarp-watchdog");
             while (ftr.wait_for(1s) != std::future_status::ready)
             {
-                // do periodic non lokinet related tasks here
+                // do periodic non Session-Router related tasks here
                 if (ctx and ctx->is_up() and not ctx->looks_alive())
                 {
                     auto deadlock_cat = llarp::log::Cat("deadlock");
@@ -496,9 +496,9 @@ namespace
     }
 
     // this sets up, configures and runs the main context
-    static void start_lokinet(std::optional<std::filesystem::path> confFile, bool snode)
+    static void start_Session-Router(std::optional<std::filesystem::path> confFile, bool snode)
     {
-        llarp::log::info(logcat, "starting up {}", llarp::LOKINET_VERSION_FULL);
+        llarp::log::info(logcat, "starting up {}", llarp::SROUTER_VERSION_FULL);
         try
         {
             auto type = snode ? llarp::config::Type::Relay : llarp::config::Type::FullClient;
@@ -524,7 +524,7 @@ namespace
         }
         catch (llarp::util::bind_socket_error& ex)
         {
-            auto msg = "{}; is lokinet already running?"_format(ex.what());
+            auto msg = "{}; is Session-Router already running?"_format(ex.what());
             llarp::log::error(logcat, "{}", msg);
             throw std::runtime_error{msg};
         }
@@ -550,21 +550,21 @@ int main(int argc, char* argv[])
     // oxen::log::add_sink(llarp::logRingBuffer, llarp::log::DEFAULT_PATTERN_MONO);
 
 #ifndef _WIN32
-    return lokinet_main(argc, argv);
+    return Session-Router_main(argc, argv);
 #else
     if (auto hntdll = GetModuleHandle("ntdll.dll"))
     {
         if (GetProcAddress(hntdll, "wine_get_version"))
         {
-            static const char* text = "Don't run lokinet in wine, aborting startup";
-            static const char* title = "Lokinet Wine Error";
+            static const char* text = "Don't run Session-Router in wine, aborting startup";
+            static const char* title = "Session Router Wine Error";
             MessageBoxA(NULL, text, title, MB_ICONHAND);
             std::abort();
         }
     }
 
     SERVICE_TABLE_ENTRY DispatchTable[] = {
-        {strdup("lokinet"), (LPSERVICE_MAIN_FUNCTION)win32_daemon_entry}, {NULL, NULL}};
+        {strdup("Session-Router"), (LPSERVICE_MAIN_FUNCTION)win32_daemon_entry}, {NULL, NULL}};
 
     // Try first to run as a service; if this works it fires off to win32_daemon_entry and doesn't
     // return until the service enters STOPPED state.
@@ -577,7 +577,7 @@ int main(int argc, char* argv[])
     if (error == ERROR_FAILED_SERVICE_CONTROLLER_CONNECT)
     {
         llarp::sys::service_manager->disable();
-        return lokinet_main(argc, argv);
+        return Session-Router_main(argc, argv);
     }
     else
     {

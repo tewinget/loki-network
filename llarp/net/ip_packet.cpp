@@ -303,7 +303,7 @@ namespace llarp
         udp_hdr->src = oxenc::host_to_big(src.port());
         udp_hdr->dest = oxenc::host_to_big(dest.port());
         udp_hdr->len = oxenc::host_to_big<uint16_t>(payload.size() + sizeof(udp_header));
-        udp_hdr->checksum = 0;  // FIXME: does this matter?  old lokinet set 0
+        udp_hdr->checksum = 0;  // FIXME: does this matter?  old Session Router set 0
 
         return pkt;
     }

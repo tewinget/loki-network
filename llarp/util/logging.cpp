@@ -6,7 +6,7 @@
 namespace llarp
 {
 
-    log::CategoryLogger log_global = log::Cat("lokinet");
+    log::CategoryLogger log_global = log::Cat("session-router");
 
     std::shared_ptr<log::RingBufferSink> logRingBuffer{};
 

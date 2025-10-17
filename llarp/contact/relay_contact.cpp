@@ -173,7 +173,7 @@ namespace llarp
     }
 
     static const std::unordered_set<std::string_view> obsolete_bootstraps{
-        // Currently none (since Lokinet network reboot invalidated all old ones anyway)
+        // Currently none (since Session Router network reboot invalidated all old ones anyway)
         // "7a16ac0b85290bcf69b2f3b52456d7e989ac8913b4afbb980614e249a3723218"_hex,
     };
 
@@ -189,7 +189,7 @@ namespace llarp
           _addr{router.public_addr()},
           _timestamp{std::chrono::time_point_cast<std::chrono::seconds>(std::chrono::system_clock::now())},
           _netid{router.netid()},
-          _router_version{llarp::LOKINET_VERSION}
+          _router_version{llarp::SROUTER_VERSION}
     {
         oxenc::bt_dict_producer btdp;
         if (VERSION != 0)
@@ -229,7 +229,7 @@ namespace llarp
 
         btdp.append("t", _timestamp.time_since_epoch().count());
 
-        static_assert(llarp::LOKINET_VERSION.size() == 3);
+        static_assert(llarp::SROUTER_VERSION.size() == 3);
         btdp.append("v", std::span{_router_version});
 
         btdp.append_signature("~", [&router](std::span<const std::byte> to_sign) {

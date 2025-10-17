@@ -33,7 +33,7 @@ namespace llarp::auth
             case AuthFileType::PLAIN:
                 return hash == challenge;
             case AuthFileType::HASHES:
-#ifdef LOKINET_HAVE_CRYPT
+#ifdef SROUTER_HAVE_CRYPT
                 return crypto::check_passwd_hash(std::move(hash), std::move(challenge));
 #else
                 return false;

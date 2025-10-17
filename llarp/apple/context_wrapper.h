@@ -1,6 +1,6 @@
 #pragma once
 
-// C-linkage wrappers for interacting with a lokinet context, so that we can call them from Swift
+// C-linkage wrappers for interacting with a Session Router context, so that we can call them from Swift
 // code (which currently doesn't support C++ interoperability at all).
 
 #ifdef __cplusplus
@@ -60,8 +60,8 @@ extern "C"
     /// Pack of crap to be passed into llarp_apple_init to initialize
     typedef struct llarp_apple_config
     {
-        /// lokinet configuration directory, expected to be the application-specific "home"
-        /// directory, which is where state files are stored and the lokinet.ini will be loaded (or
+        /// Session Router configuration directory, expected to be the application-specific "home"
+        /// directory, which is where state files are stored and the session_router.ini will be loaded (or
         /// created if it doesn't exist).
         const char* config_dir;
         /// path to the default bootstrap.signed file included in installation, which will be used
@@ -84,8 +84,8 @@ extern "C"
         uint16_t upstream_dns_port;
 
 #ifdef MACOS_SYSTEM_EXTENSION
-        /// DNS bind IP; llarp_apple_init writes the lokinet config value here so that we know (in
-        /// Apple API code) what to set DNS to when lokinet gets turned on.  Null terminated.
+        /// DNS bind IP; llarp_apple_init writes the Session Router config value here so that we know (in
+        /// Apple API code) what to set DNS to when Session Router gets turned on.  Null terminated.
         char dns_bind_ip[INET_ADDRSTRLEN];
 #endif
 
@@ -95,7 +95,7 @@ extern "C"
         /// llarp_apple_start when invoked.
         /// @{
 
-        /// simple wrapper around NSLog for lokinet message logging
+        /// simple wrapper around NSLog for Session Router message logging
         ns_logger_callback ns_logger;
 
         /// C function callback that will be called when we need to write a packet to the packet
@@ -103,7 +103,7 @@ extern "C"
         /// the data in bytes.
         packet_writer_callback packet_writer;
 
-        /// C function callback that will be called when lokinet is setup and ready to start
+        /// C function callback that will be called when Session Router is setup and ready to start
         /// receiving packets from the packet tunnel.  This should set up the read handler to
         /// deliver packets via llarp_apple_incoming.
         start_reading_callback start_reading;
@@ -114,8 +114,8 @@ extern "C"
         /// @}
     } llarp_apple_config;
 
-    /// Initializes a lokinet instance by initializing various objects and loading the configuration
-    /// (if <config_dir>/lokinet.ini exists).  Does not actually start lokinet (call
+    /// Initializes a Session Router instance by initializing various objects and loading the configuration
+    /// (if <config_dir>/session_router.ini exists).  Does not actually start Session Router (call
     /// llarp_apple_start for that).
     ///
     /// Returns NULL if there was a problem initializing/loading the configuration, otherwise
@@ -125,19 +125,19 @@ extern "C"
     /// and return the ip/mask/dns fields needed for the tunnel.
     void* llarp_apple_init(llarp_apple_config* config);
 
-    /// Starts the lokinet instance in a new thread.
+    /// Starts the Session Router instance in a new thread.
     ///
-    /// \param lokinet the void pointer returned by llarp_apple_init
+    /// \param Session Router the void pointer returned by llarp_apple_init
     ///
     /// \param callback_context Opaque pointer that is passed into the various callbacks provided to
     /// llarp_apple_init.  This code does nothing with this pointer aside from passing it through to
     /// callbacks.
     ///
     /// \returns 0 on succesful startup, -1 on failure.
-    int llarp_apple_start(void* lokinet, void* callback_context);
+    int llarp_apple_start(void* Session Router, void* callback_context);
 
     /// Returns a pointer to the uv event loop.  Must have called llarp_apple_start already.
-    uv_loop_t* llarp_apple_get_uv_loop(void* lokinet);
+    uv_loop_t* llarp_apple_get_uv_loop(void* Session Router);
 
     /// Struct of packet data; a C array of tests gets passed to llarp_apple_incoming
     typedef struct llarp_incoming_packet
@@ -146,19 +146,19 @@ extern "C"
         size_t size;
     } llarp_incoming_packet;
 
-    /// Called to deliver one or more incoming packets from the apple layer into lokinet.  Takes a C
+    /// Called to deliver one or more incoming packets from the apple layer into session_router.  Takes a C
     /// array of `llarp_incoming_packets` with pointers/sizes set to the individual new packets that
     /// have arrived.
     ///
     /// Returns the number of valid packets on success (which can be less than the number of
     /// provided packets, if some failed to parse), or -1 if there is no current active VPNInterface
-    /// associated with the lokinet instance (which generally means llarp_apple_start wasn't called
-    /// or failed, or lokinet is in the process of shutting down).
-    int llarp_apple_incoming(void* lokinet, const llarp_incoming_packet* packets, size_t size);
+    /// associated with the Session Router instance (which generally means llarp_apple_start wasn't called
+    /// or failed, or Session Router is in the process of shutting down).
+    int llarp_apple_incoming(void* Session Router, const llarp_incoming_packet* packets, size_t size);
 
-    /// Stops a lokinet instance created with `llarp_apple_initialize`.  This waits for lokinet to
+    /// Stops a Session Router instance created with `llarp_apple_initialize`.  This waits for Session Router to
     /// shut down and rejoins the thread.  After this call the given pointer is no longer valid.
-    void llarp_apple_shutdown(void* lokinet);
+    void llarp_apple_shutdown(void* Session Router);
 
 #ifdef __cplusplus
 }  // extern "C"

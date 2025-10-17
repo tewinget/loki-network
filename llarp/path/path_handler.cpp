@@ -147,14 +147,14 @@ namespace llarp::path
 
     const RelayContact* PathHandler::select_first_hop(std::function<bool(const RelayContact&)> pred) const
     {
-#ifdef LOKINET_DEBUG_PATH_SEED
+#ifdef SROUTER_DEBUG_PATH_SEED
         auto current_remotes_unsorted =
 #else
         auto current_remotes =
 #endif
             router.link_endpoint().get_current_relays();
 
-#ifdef LOKINET_DEBUG_PATH_SEED
+#ifdef SROUTER_DEBUG_PATH_SEED
         std::vector<RouterID> current_remotes;
         current_remotes.reserve(current_remotes_unsorted.size());
         current_remotes.assign(current_remotes_unsorted.begin(), current_remotes_unsorted.end());
@@ -190,7 +190,7 @@ namespace llarp::path
                 // code multiple times, which we don't want.
                 if (acceptable == 0
                     || (
-#ifdef LOKINET_DEBUG_PATH_SEED
+#ifdef SROUTER_DEBUG_PATH_SEED
                         rng ? std::uniform_int_distribution<int>{0, acceptable}(*rng) :
 #endif
                             std::uniform_int_distribution<int>{0, acceptable}(llarp::csrng) == 0))

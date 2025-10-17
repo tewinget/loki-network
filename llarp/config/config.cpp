@@ -15,7 +15,7 @@
 #include <filesystem>
 #include <stdexcept>
 
-#ifndef LOKINET_EMBEDDED_ONLY
+#ifndef SROUTER_EMBEDDED_ONLY
 #include <oxenmq/address.h>
 #endif
 
@@ -47,7 +47,7 @@ namespace llarp
 
     const llarp::net::Platform* ConfigGenParameters::net_ptr()
     {
-#ifndef LOKINET_EMBEDDED_ONLY
+#ifndef SROUTER_EMBEDDED_ONLY
         if (type != config::Type::EmbeddedClient)
             return llarp::net::Platform::Default_ptr();
 #endif
@@ -126,7 +126,7 @@ namespace llarp
             "data-dir",
             Default{params.default_data_dir},
             Comment{
-                "Optional directory for containing lokinet runtime data. This includes generated",
+                "Optional directory for containing Session Router runtime data. This includes generated",
                 "private keys.",
             },
             [this](std::filesystem::path arg) {
@@ -159,7 +159,7 @@ namespace llarp
             "public-port",
             RelayOnly,
             Comment{
-                "When specifying public-ip=, this specifies the public UDP port at which this lokinet",
+                "When specifying public-ip=, this specifies the public UDP port at which this Session Router",
                 "router is reachable. Defaults to the [bind]:listen port when public-ip is specified.",
             },
             public_port_loader(public_addr, "[router]:public-port"));
@@ -266,7 +266,7 @@ namespace llarp
             Default{false},
             assignment_acceptor(exit_enabled),
             Comment{
-                "Enable exit-node functionality for local lokinet instance.",
+                "Enable exit-node functionality for local Session Router instance.",
             });
 
         conf.define_option<std::string>(
@@ -366,7 +366,7 @@ namespace llarp
                 "10.0.x.y addresses.",
                 "",
                 "Note that this option does not automatically configure network routing; that",
-                "must be configured separately on the exit system to handle lokinet traffic.",
+                "must be configured separately on the exit system to handle Session Router traffic.",
             },
             [this](std::string arg) {
                 if (arg == "public")
@@ -455,7 +455,7 @@ namespace llarp
             assignment_acceptor(auth_endpoint),
             Comment{
                 "OMQ endpoint to talk to for authenticating new sessions",
-                "ipc:///var/lib/lokinet/auth.socket",
+                "ipc:///var/lib/Session Router/auth.socket",
                 "tcp://127.0.0.1:5555",
             });
 
@@ -517,7 +517,7 @@ namespace llarp
             FullClientOnly,
             Comment{
                 "How to interpret the contents of an auth file.",
-#ifdef LOKINET_HAVE_CRYPT
+#ifdef SROUTER_HAVE_CRYPT
                 "Possible values: hash, plaintext",
 #else
                 "Possible values: plaintext",
@@ -528,8 +528,8 @@ namespace llarp
                     auth_file_type = auth::AuthFileType::PLAIN;
                 else if (arg == "hashed" || arg == "hashes" || arg == "hash")
                 {
-#ifndef LOKINET_HAVE_CRYPT
-                    throw std::invalid_argument{"Hashed auth files are not supported by this Lokinet build"};
+#ifndef SROUTER_HAVE_CRYPT
+                    throw std::invalid_argument{"Hashed auth files are not supported by this Session Router build"};
 #endif
                     auth_file_type = auth::AuthFileType::HASHES;
                 }
@@ -579,7 +579,7 @@ namespace llarp
             Default{true},
             Comment{
                 "Enable / disable automatic route configuration.",
-                "When this is enabled and an exit is used Lokinet will automatically configure the",
+                "When this is enabled and an exit is used Session Router will automatically configure the",
                 "operating system routes to route public internet traffic through the exit node.",
                 "This is enabled by default, but can be disabled if advanced/manual exit routing",
                 "configuration is desired."},
@@ -592,7 +592,7 @@ namespace llarp
             Default{true},
             Comment{
                 "Enable / disable route configuration blackholes.",
-                "When enabled lokinet will drop IPv4 and IPv6 traffic (when in exit mode) that is "
+                "When enabled Session Router will drop IPv4 and IPv6 traffic (when in exit mode) that is "
                 "not",
                 "handled in the exit configuration.  Enabled by default."},
             assignment_acceptor(blackhole_routes));
@@ -602,7 +602,7 @@ namespace llarp
             "ifname",
             NotEmbedded,
             Comment{
-                "Interface name for lokinet traffic. If unset lokinet will look for a free name",
+                "Interface name for Session Router traffic. If unset Session Router will look for a free name",
                 "matching 'lokitunN', starting at N=0 (e.g. lokitun0, lokitun1, ...).",
 #ifdef __linux__
                 "",
@@ -617,10 +617,10 @@ namespace llarp
             "ifaddr",
             NotEmbedded,
             Comment{
-                "Local IP and netmask for lokinet traffic. For example, 172.16.0.1/16 to use",
-                "172.16.0.1 for this lokinet instance and 172.16.x.y for remote peers. If omitted",
-                "then lokinet will attempt to automatically select an unused private range.",
-                "If you specify an all-0 address with range (e.g. 0.0.0.0/12) then lokinet will",
+                "Local IP and netmask for Session Router traffic. For example, 172.16.0.1/16 to use",
+                "172.16.0.1 for this Session Router instance and 172.16.x.y for remote peers. If omitted",
+                "then Session Router will attempt to automatically select an unused private range.",
+                "If you specify an all-0 address with range (e.g. 0.0.0.0/12) then Session Router will",
                 "auto-select a private range of the given size.",
             },
             [this](std::string arg) {
@@ -640,7 +640,7 @@ namespace llarp
             NotEmbedded,
             Hidden,
             Comment{
-                "Enables internal IPv6 traffic for lokinet.  Can be set to:",
+                "Enables internal IPv6 traffic for session_router.  Can be set to:",
                 "  - false to disable IPv6 support.  This is the default if omitted",
                 "  - true to enable IPv6 support and auto-detect a free private /64 network range",
                 "  - ::/80 to auto-detect a free private range of netmask 80 (change as needed) ",
@@ -722,7 +722,7 @@ namespace llarp
                 "    srv=_service._protocol priority weight port target.loki",
                 "and can be specified multiple times as needed.",
                 "For more info see",
-                "https://docs.oxen.io/products-built-on-oxen/lokinet/snapps/hosting-snapps",
+                "https://docs.oxen.io/products-built-on-oxen/Session Router/snapps/hosting-snapps",
                 "and general description of DNS SRV record configuration.",
             },
             [this](std::string arg) {
@@ -742,9 +742,9 @@ namespace llarp
             FullClientOnly,
             Comment{
                 "If given this specifies a file in which to record mapped local tunnel addresses so",
-                "the same local address will be used for the same lokinet address on reboot. If this",
-                "is not specified then the local IP of remote lokinet targets will not persist across",
-                "restarts of lokinet.",
+                "the same local address will be used for the same Session Router address on reboot. If this",
+                "is not specified then the local IP of remote Session Router targets will not persist across",
+                "restarts of session_router.",
             },
             [this, rel_base = params.default_data_dir](std::filesystem::path file) {
                 if (!file.empty() && file.is_relative())
@@ -895,7 +895,7 @@ namespace llarp
 #ifdef __linux__
 #ifdef WITH_SYSTEMD
             // when we have systemd support add a random high port on loopback as well
-            // see https://github.com/oxen-io/lokinet/issues/1887#issuecomment-1091897282
+            // see https://github.com/oxen-io/Session Router/issues/1887#issuecomment-1091897282
             Default{"127.0.0.1:0"},
 #endif
             Default{"127.3.2.1:53"},
@@ -949,7 +949,7 @@ namespace llarp
             FullClientOnly,
             Default{
                 platform::is_windows or platform::is_android or (platform::is_macos and not platform::is_apple_sysex)},
-            Comment{"Intercept all dns traffic (udp/53) going into our lokinet network interface "
+            Comment{"Intercept all dns traffic (udp/53) going into our Session Router network interface "
                     "instead of binding a local udp socket"},
             assignment_acceptor(l3_intercept));
 
@@ -1017,9 +1017,9 @@ namespace llarp
             "no-resolvconf",
             FullClientOnly,
             Comment{
-                "Can be uncommented and set to 1 to disable resolvconf configuration of lokinet "
+                "Can be uncommented and set to 1 to disable resolvconf configuration of Session Router "
                 "DNS.",
-                "(This is not used directly by lokinet itself, but by the lokinet init scripts",
+                "(This is not used directly by Session Router itself, but by the Session Router init scripts",
                 "on systems which use resolveconf)",
             });
 
@@ -1033,7 +1033,7 @@ namespace llarp
         conf.add_section_comments(
             "bind",
             {
-                "This section allows specifying the IPs that lokinet uses for incoming and outgoing",
+                "This section allows specifying the IPs that Session Router uses for incoming and outgoing",
                 "connections.  For simple setups it can usually be left blank, but may be required",
                 "for routers with multiple IPs, or routers that must listen on a private IP with",
                 "forwarded public traffic.  It can also be useful for clients that want to use a",
@@ -1071,11 +1071,11 @@ namespace llarp
             "bind",
             "listen",
             Comment{
-                "IP and/or port for lokinet to bind to for inbound/outbound connections.",
+                "IP and/or port for Session Router to bind to for inbound/outbound connections.",
                 "",
-                "If IP is omitted then lokinet will search for a local network interface with a",
+                "If IP is omitted then Session Router will search for a local network interface with a",
                 "public IP address and use that IP (and will exit with an error if no such IP is found",
-                "on the system).  If port is omitted then lokinet defaults to 1090 (routers) or 1091 (clients).",
+                "on the system).  If port is omitted then Session Router defaults to 1090 (routers) or 1091 (clients).",
                 "",
                 "Examples:",
                 "    listen=15.5.29.5:443",
@@ -1090,7 +1090,7 @@ namespace llarp
             [this, parse_addr_for_link](const std::string& arg) {
                 if (listen_addr)
                     throw std::runtime_error{
-                        "Multiple listen addresses found.  If upgrading from an older lokinet, delete extra "
+                        "Multiple listen addresses found.  If upgrading from an older Session Router, delete extra "
                         "[bind]:inbound and [bind]:IP and use only one [bind]:listen"};
                 listen_addr = parse_addr_for_link(arg);
             });
@@ -1099,7 +1099,7 @@ namespace llarp
             "bind", "inbound", RelayOnly, MultiValue, Hidden, [this, parse_addr_for_link](const std::string& arg) {
                 if (listen_addr)
                     throw std::runtime_error{
-                        "Multiple listen addresses found.  If upgrading from an older lokinet, delete extra "
+                        "Multiple listen addresses found.  If upgrading from an older Session Router, delete extra "
                         "[bind]:inbound and [bind]:IP and use only one [bind]:listen"};
                 listen_addr = parse_addr_for_link(arg);
                 log::warning(
@@ -1112,11 +1112,11 @@ namespace llarp
         conf.define_option<std::string>("bind", "outbound", MultiValue, Deprecated, Hidden);
 
         conf.add_undeclared_handler("bind", [this](std::string_view, std::string_view key, std::string_view val) {
-            // special case: old lokinet used '*' for outbound port, which now does nothing
+            // special case: old Session Router used '*' for outbound port, which now does nothing
             if (key == "*")
             {
                 log::warning(
-                    logcat, "[bind]:*=PORT is deprecated and no longer does anything in this version of Lokinet");
+                    logcat, "[bind]:*=PORT is deprecated and no longer does anything in this version of Session Router");
                 return;
             }
 
@@ -1127,7 +1127,7 @@ namespace llarp
             // almost never used, and so we only look for the format and error on the latter.
             if (listen_addr)
                 throw std::runtime_error{
-                    "Multiple listen addresses found.  If upgrading from an older lokinet, replace extra "
+                    "Multiple listen addresses found.  If upgrading from an older Session Router, replace extra "
                     "[bind]:inbound=/IP= settings with a single [bind]:listen="};
 
             uint16_t port{0};
@@ -1243,7 +1243,7 @@ namespace llarp
                 "    rpc=tcp://127.0.0.1:5678",
             },
             [this](std::string arg) {
-#ifndef LOKINET_EMBEDDED_ONLY
+#ifndef SROUTER_EMBEDDED_ONLY
                 oxenmq::address test_valid{arg};
 #endif
                 rpc_addr = std::move(arg);
@@ -1364,10 +1364,10 @@ namespace llarp
             Default{CLIENT_ROUTER_CONNECTIONS},
             ClientOnly,
             Comment{
-                "Minimum number of routers lokinet client will attempt to maintain direct (i.e. \"edge\")",
+                "Minimum number of routers Session Router client will attempt to maintain direct (i.e. \"edge\")",
                 "connections to.  All paths will start through one of these edges.",
                 "",
-                "Lokinet may use more than this number of edges in single-hop connection mode",
+                "Session Router may use more than this number of edges in single-hop connection mode",
                 "(see [paths]:client-hops) and may use fewer connections if limited by [paths]:strict-edge."},
             lower_bounded_assignment_acceptor(edge_connections, 1, "[paths]:edge-connections"));
 
@@ -1382,7 +1382,7 @@ namespace llarp
                 "and as a fallback for path failure.",
                 "",
                 "Note that this value applies to EACH outbound connection separately: if you have active",
-                "connections to 5 clients and 3 snodes, lokinet will maintain 16 outbound paths (at the",
+                "connections to 5 clients and 3 snodes, Session Router will maintain 16 outbound paths (at the",
                 "default setting of 2).",
                 "",
                 "Setting this value to 1 is allowed, but will result in brief periods of packet loss",
@@ -1402,7 +1402,7 @@ namespace llarp
                 "The overall number of hops to the remote client is this value PLUS the number of inbound",
                 "hops the other client has configured for their inbound hops (via [paths]:inbound-hops).",
                 "",
-                "Setting this value to 1 puts lokinet into single-hop mode for the connection from this",
+                "Setting this value to 1 puts Session Router into single-hop mode for the connection from this",
                 "client to the aligned pivot router, which potentially weakens connection privacy as",
                 "your public IP will be observable to any service node listed as a pivot for any remote",
                 "client that you connect to."},
@@ -1424,7 +1424,7 @@ namespace llarp
                 "",
                 "If not set, this default to one greater than the value of [paths]:client-hops.",
                 "",
-                "Setting this value to 1 puts lokinet into single-hop mode for the connection from this",
+                "Setting this value to 1 puts Session Router into single-hop mode for the connection from this",
                 "client to service node (i.e. `.snode` addresses) which potentially weakens connection",
                 "privacy as any service nodes you connect to will be able to observe your public IP."},
             bounded_assignment_acceptor(relay_hops_, 1, path::BUILD_LENGTH, "[paths]:relay-hops"));
@@ -1435,7 +1435,7 @@ namespace llarp
             ClientOnly,
             Default{4},
             Comment{
-                "Number of local paths that Lokinet maintains for both network reachability (i.e. remote",
+                "Number of local paths that Session Router maintains for both network reachability (i.e. remote",
                 "clients connecting to this instance) and network communication such as looking up",
                 "client lto maintain for network reachability and for general network requests",
                 "",
@@ -1450,8 +1450,8 @@ namespace llarp
             Hidden,
             Default{0},
             Comment{
-                "Extra inbound paths to use for Lokinet connectivity.  This option is hidden as it is not",
-                "meant for normal Lokinet use, and may be removed or replaced without warning in the future",
+                "Extra inbound paths to use for Session Router connectivity.  This option is hidden as it is not",
+                "meant for normal Session Router use, and may be removed or replaced without warning in the future",
             },
             lower_bounded_assignment_acceptor(inbound_paths_extra, 0, "[paths]:inbound-paths-extra"));
 
@@ -1462,9 +1462,9 @@ namespace llarp
             Comment{
                 "Number of hops to use for inbound and general request connections (see [paths]:inbound-paths).",
                 "",
-                "When a remote Lokinet is connecting to this instance, this controls the path length of the",
+                "When a remote Session Router is connecting to this instance, this controls the path length of the",
                 "local side of the full client-to-client path (i.e. from the common relay \"pivot\" to this",
-                "Lokinet instance).",
+                "Session Router instance).",
                 "",
                 "If not set, this value defaults to the same value as [paths]:client-hops.",
             },
@@ -1502,7 +1502,7 @@ namespace llarp
                 "For instance, setting this to 16 selects routers for each path that have distinct",
                 "x.y.*.* IP addresses; 32 merely requires that each router have a unique IP.  Setting",
                 "this to 0 disables IP uniqueness entirely (i.e. paths can be selected that go through",
-                "different Lokinet routers on the same IP)",
+                "different Session Router routers on the same IP)",
             });
 
         conf.define_option<std::chrono::seconds>(
@@ -1564,7 +1564,7 @@ namespace llarp
                 "misses more than this, the path will be considered to have died and be replaced."},
             lower_bounded_assignment_acceptor(max_missed_pings, 0, "[paths]:max-missed-pings"));
 
-#ifdef LOKINET_DEBUG_PATH_SEED
+#ifdef SROUTER_DEBUG_PATH_SEED
         conf.define_option<uint64_t>(
             "paths", "debug-path-seed", ClientOnly, Hidden, assignment_acceptor(debug_path_seed));
 #endif
@@ -1587,11 +1587,11 @@ namespace llarp
             },
             Comment{
                 R"(List of service node public keys of "edge" nodes (also known as "first hops") that)",
-                "Lokinet will exclusively use when establishing paths through the network.  You can use",
+                "Session Router will exclusively use when establishing paths through the network.  You can use",
                 "this to always use closer (i.e. lower latency) first hops, or to limit which network",
                 "nodes see connections from your IP address.",
                 "",
-                "Public keys can be provided either in native lokinet address format (ADDR.snode), or using",
+                "Public keys can be provided either in native Session Router address format (ADDR.snode), or using",
                 "the 64-character hexademical pubkey notation common used for Session service nodes.",
                 "Specify this option multiple times to specify multiple allowed edge nodes.",
                 "",
@@ -1622,7 +1622,7 @@ namespace llarp
             ClientOnly,
             MultiValue,
             Comment{
-                "Adds a lokinet relay `.snode` address to the list of relays to avoid when",
+                "Adds a Session Router relay `.snode` address to the list of relays to avoid when",
                 "connecting to edges or building paths. Can be specified multiple times.",
             },
             [this](std::string arg) {
@@ -1723,10 +1723,10 @@ namespace llarp
 
     void Config::load_config_data(std::string ini, std::optional<std::filesystem::path> filename)
     {
-#ifdef LOKINET_EMBEDDED_ONLY
+#ifdef SROUTER_EMBEDDED_ONLY
         if (type != Type::EmbeddedClient)
             throw std::runtime_error{
-                "This lokinet build only supports embedded clients, not {}"_format(to_string(type))};
+                "This Session Router build only supports embedded clients, not {}"_format(to_string(type))};
 #endif
         auto params = make_gen_params();
         ConfigDefinition conf{type};

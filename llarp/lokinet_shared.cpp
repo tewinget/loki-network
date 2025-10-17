@@ -7,7 +7,7 @@
 #include <llarp/util/logging/buffer.hpp>
 #include <llarp/util/logging/callback_sink.hpp>
 
-#include <lokinet.h>
+#include <session_router.h>
 #include <oxenc/base32z.h>
 
 #include <chrono>
@@ -21,7 +21,7 @@
 
 namespace
 {
-    static auto logcat = oxen::log::Cat("liblokinet");
+    static auto logcat = oxen::log::Cat("libsessionrouter");
 
     struct Context : public llarp::Context
     {
@@ -36,11 +36,11 @@ namespace
         void* m_FlowUserData;
         std::chrono::seconds m_FlowTimeout;
         std::chrono::time_point<Clock_t> m_ExpiresAt;
-        lokinet_udp_flowinfo m_FlowInfo;
-        lokinet_udp_flow_recv_func m_Recv;
+        session_router_udp_flowinfo m_FlowInfo;
+        session_router_udp_flow_recv_func m_Recv;
 
         /// call timeout hook for this flow
-        void TimedOut(lokinet_udp_flow_timeout_func timeout) { timeout(&m_FlowInfo, m_FlowUserData); }
+        void TimedOut(session_router_udp_flow_timeout_func timeout) { timeout(&m_FlowInfo, m_FlowUserData); }
 
         /// mark this flow as active
         /// updates the expires at timestamp
@@ -64,9 +64,9 @@ namespace
         using AddressVariant_t = llarp::AddressVariant_t;
         int m_SocketID;
         llarp::nuint16_t m_LocalPort;
-        lokinet_udp_flow_filter m_Filter;
-        lokinet_udp_flow_recv_func m_Recv;
-        lokinet_udp_flow_timeout_func m_Timeout;
+        session_router_udp_flow_filter m_Filter;
+        session_router_udp_flow_recv_func m_Recv;
+        session_router_udp_flow_timeout_func m_Timeout;
         void* m_User;
         std::weak_ptr<llarp::service::Endpoint> m_Endpoint;
 
@@ -77,9 +77,9 @@ namespace
         explicit UDPHandler(
             int socketid,
             llarp::nuint16_t localport,
-            lokinet_udp_flow_filter filter,
-            lokinet_udp_flow_recv_func recv,
-            lokinet_udp_flow_timeout_func timeout,
+            session_router_udp_flow_filter filter,
+            session_router_udp_flow_recv_func recv,
+            session_router_udp_flow_timeout_func timeout,
             void* user,
             std::weak_ptr<llarp::service::Endpoint> ep)
             : m_SocketID{socketid},
@@ -103,7 +103,7 @@ namespace
 
         void AddFlow(
             const AddressVariant_t& from,
-            const lokinet_udp_flowinfo& flow_addr,
+            const session_router_udp_flowinfo& flow_addr,
             void* flow_userdata,
             int flow_timeoutseconds,
             std::optional<llarp::net::IPPacket> firstPacket = std::nullopt)
@@ -143,7 +143,7 @@ namespace
                     return;
                 }
             }
-            lokinet_udp_flowinfo flow_addr{};
+            session_router_udp_flowinfo flow_addr{};
             // set flow remote address
             std::string addrstr = var::visit([](auto&& from) { return from.to_string(); }, from);
 
@@ -167,7 +167,7 @@ namespace
     };
 }  // namespace
 
-struct lokinet_context
+struct session_router_context
 {
     std::mutex m_access;
 
@@ -178,7 +178,7 @@ struct lokinet_context
 
     int _socket_id = 0;
 
-    ~lokinet_context()
+    ~session_router_context()
     {
         if (runner)
             runner->join();
@@ -201,9 +201,9 @@ struct lokinet_context
     [[nodiscard]] std::optional<int> make_udp_handler(
         const std::shared_ptr<llarp::service::Endpoint>& ep,
         llarp::net::port_t exposePort,
-        lokinet_udp_flow_filter filter,
-        lokinet_udp_flow_recv_func recv,
-        lokinet_udp_flow_timeout_func timeout,
+        session_router_udp_flow_filter filter,
+        session_router_udp_flow_recv_func recv,
+        session_router_udp_flow_timeout_func timeout,
         void* user)
     {
         if (udp_sockets.empty())
@@ -282,13 +282,13 @@ struct lokinet_context
 
 namespace
 {
-    void stream_error(lokinet_stream_result* result, int err)
+    void stream_error(session_router_stream_result* result, int err)
     {
-        std::memset(result, 0, sizeof(lokinet_stream_result));
+        std::memset(result, 0, sizeof(session_router_stream_result));
         result->error = err;
     }
 
-    void stream_okay(lokinet_stream_result* result, std::string host, int port, int stream_id)
+    void stream_okay(session_router_stream_result* result, std::string host, int port, int stream_id)
     {
         stream_error(result, 0);
         std::copy_n(host.c_str(), std::min(host.size(), sizeof(result->local_address) - 1), result->local_address);
@@ -324,7 +324,7 @@ namespace
         return -1;
     }
 
-    std::optional<lokinet_srv_record> SRVFromData(const llarp::dns::SRVData& data, std::string name)
+    std::optional<session_router_srv_record> SRVFromData(const llarp::dns::SRVData& data, std::string name)
     {
         // TODO: implement me
         (void)data;
@@ -334,11 +334,11 @@ namespace
 
 }  // namespace
 
-struct lokinet_srv_lookup_private
+struct session_router_srv_lookup_private
 {
-    std::vector<lokinet_srv_record> results;
+    std::vector<session_router_srv_record> results;
 
-    int LookupSRV(std::string host, std::string service, lokinet_context* ctx)
+    int LookupSRV(std::string host, std::string service, session_router_context* ctx)
     {
         std::promise<int> promise;
         {
@@ -371,7 +371,7 @@ struct lokinet_srv_lookup_private
         return future.get();
     }
 
-    void IterateAll(std::function<void(lokinet_srv_record*)> visit)
+    void IterateAll(std::function<void(session_router_srv_record*)> visit)
     {
         for (auto& result : results)
             visit(&result);
@@ -382,12 +382,12 @@ struct lokinet_srv_lookup_private
 
 extern "C"
 {
-    void EXPORT lokinet_set_netid(const char* netid)
+    void EXPORT session_router_set_netid(const char* netid)
     {
         llarp::NetID::DefaultValue() = llarp::NetID{reinterpret_cast<const uint8_t*>(netid)};
     }
 
-    const char* EXPORT lokinet_get_netid()
+    const char* EXPORT session_router_get_netid()
     {
         const auto netid = llarp::NetID::DefaultValue().to_string();
         return strdup(netid.c_str());
@@ -395,7 +395,7 @@ extern "C"
 
     static auto last_log_set = llarp::log::Level::info;
 
-    int EXPORT lokinet_log_level(const char* level)
+    int EXPORT session_router_log_level(const char* level)
     {
         try
         {
@@ -411,7 +411,7 @@ extern "C"
         return -1;
     }
 
-    char* EXPORT lokinet_address(struct lokinet_context* ctx)
+    char* EXPORT session_router_address(struct session_router_context* ctx)
     {
         if (not ctx)
             return nullptr;
@@ -422,7 +422,7 @@ extern "C"
         return strdup(addrStr.c_str());
     }
 
-    int EXPORT lokinet_add_bootstrap_rc(const char* data, size_t datalen, struct lokinet_context* ctx)
+    int EXPORT session_router_add_bootstrap_rc(const char* data, size_t datalen, struct session_router_context* ctx)
     {
         if (data == nullptr or datalen == 0)
             return -3;
@@ -458,20 +458,20 @@ extern "C"
         return 0;
     }
 
-    struct lokinet_context* EXPORT lokinet_context_new() { return new lokinet_context{}; }
+    struct session_router_context* EXPORT session_router_context_new() { return new session_router_context{}; }
 
-    void EXPORT lokinet_context_free(struct lokinet_context* ctx)
+    void EXPORT session_router_context_free(struct session_router_context* ctx)
     {
-        lokinet_context_stop(ctx);
+        session_router_context_stop(ctx);
         delete ctx;
     }
 
-    int EXPORT lokinet_context_start(struct lokinet_context* ctx)
+    int EXPORT session_router_context_start(struct session_router_context* ctx)
     {
         if (not ctx)
             return -1;
         auto lock = ctx->acquire();
-        ctx->config->router.m_netId = lokinet_get_netid();
+        ctx->config->router.m_netId = session_router_get_netid();
         ctx->config->logging.m_logLevel = last_log_set;
         ctx->runner = std::make_unique<std::thread>([ctx]() {
             llarp::util::SetThreadName("llarp-mainloop");
@@ -500,7 +500,7 @@ extern "C"
         return 0;
     }
 
-    int EXPORT lokinet_status(struct lokinet_context* ctx)
+    int EXPORT session_router_status(struct session_router_context* ctx)
     {
         if (ctx == nullptr)
             return -3;
@@ -512,7 +512,7 @@ extern "C"
         return ctx->endpoint()->is_ready() ? 0 : -1;
     }
 
-    int EXPORT lokinet_wait_for_ready(int ms, struct lokinet_context* ctx)
+    int EXPORT session_router_wait_for_ready(int ms, struct session_router_context* ctx)
     {
         if (ctx == nullptr)
             return -1;
@@ -532,7 +532,7 @@ extern "C"
         return ep->is_ready() ? 0 : -1;
     }
 
-    void EXPORT lokinet_context_stop(struct lokinet_context* ctx)
+    void EXPORT session_router_context_stop(struct session_router_context* ctx)
     {
         if (not ctx)
             return;
@@ -550,8 +550,8 @@ extern "C"
         ctx->runner.reset();
     }
 
-    void EXPORT lokinet_outbound_stream(
-        struct lokinet_stream_result* result, const char* remote, const char* local, struct lokinet_context* ctx)
+    void EXPORT session_router_outbound_stream(
+        struct session_router_stream_result* result, const char* remote, const char* local, struct session_router_context* ctx)
     {
         if (ctx == nullptr)
         {
@@ -661,14 +661,14 @@ extern "C"
         }
     }
 
-    int EXPORT lokinet_inbound_stream(uint16_t port, struct lokinet_context* ctx)
+    int EXPORT session_router_inbound_stream(uint16_t port, struct session_router_context* ctx)
     {
         /// FIXME: delete pointer later
-        return lokinet_inbound_stream_filter(&accept_port, (void*)new std::uintptr_t{port}, ctx);
+        return session_router_inbound_stream_filter(&accept_port, (void*)new std::uintptr_t{port}, ctx);
     }
 
     int EXPORT
-    lokinet_inbound_stream_filter(lokinet_stream_filter acceptFilter, void* user, struct lokinet_context* ctx)
+    session_router_inbound_stream_filter(session_router_stream_filter acceptFilter, void* user, struct session_router_context* ctx)
     {
         if (acceptFilter == nullptr)
         {
@@ -713,7 +713,7 @@ extern "C"
         return id;
     }
 
-    char* EXPORT lokinet_hex_to_base32z(const char* hex)
+    char* EXPORT session_router_hex_to_base32z(const char* hex)
     {
         std::string_view hexview{hex};
         if (not oxenc::is_hex(hexview))
@@ -729,7 +729,7 @@ extern "C"
         return buf.release();  // leak the buffer to the caller
     }
 
-    void EXPORT lokinet_close_stream(int stream_id, struct lokinet_context* ctx)
+    void EXPORT session_router_close_stream(int stream_id, struct session_router_context* ctx)
     {
         if (not ctx)
             return;
@@ -762,19 +762,19 @@ extern "C"
     }
 
     int EXPORT
-    lokinet_srv_lookup(char* host, char* service, struct lokinet_srv_lookup_result* result, struct lokinet_context* ctx)
+    session_router_srv_lookup(char* host, char* service, struct session_router_srv_lookup_result* result, struct session_router_context* ctx)
     {
         if (result == nullptr or ctx == nullptr or host == nullptr or service == nullptr)
             return -1;
         // sanity check, if the caller has not free()'d internals yet free them
         if (result->internal)
             delete result->internal;
-        result->internal = new lokinet_srv_lookup_private{};
+        result->internal = new session_router_srv_lookup_private{};
         return result->internal->LookupSRV(host, service, ctx);
     }
 
     void EXPORT
-    lokinet_for_each_srv_record(struct lokinet_srv_lookup_result* result, lokinet_srv_record_iterator iter, void* user)
+    session_router_for_each_srv_record(struct session_router_srv_lookup_result* result, session_router_srv_record_iterator iter, void* user)
     {
         if (result and result->internal)
         {
@@ -786,7 +786,7 @@ extern "C"
         }
     }
 
-    void EXPORT lokinet_srv_lookup_done(struct lokinet_srv_lookup_result* result)
+    void EXPORT session_router_srv_lookup_done(struct session_router_srv_lookup_result* result)
     {
         if (result == nullptr or result->internal == nullptr)
             return;
@@ -794,14 +794,14 @@ extern "C"
         result->internal = nullptr;
     }
 
-    int EXPORT lokinet_udp_bind(
+    int EXPORT session_router_udp_bind(
         uint16_t exposedPort,
-        lokinet_udp_flow_filter filter,
-        lokinet_udp_flow_recv_func recv,
-        lokinet_udp_flow_timeout_func timeout,
+        session_router_udp_flow_filter filter,
+        session_router_udp_flow_recv_func recv,
+        session_router_udp_flow_timeout_func timeout,
         void* user,
-        struct lokinet_udp_bind_result* result,
-        struct lokinet_context* ctx)
+        struct session_router_udp_bind_result* result,
+        struct session_router_context* ctx)
     {
         if (filter == nullptr or recv == nullptr or timeout == nullptr or result == nullptr or ctx == nullptr)
             return EINVAL;
@@ -819,7 +819,7 @@ extern "C"
         return EINVAL;
     }
 
-    void EXPORT lokinet_udp_close(int socket_id, struct lokinet_context* ctx)
+    void EXPORT session_router_udp_close(int socket_id, struct session_router_context* ctx)
     {
         if (ctx)
         {
@@ -827,8 +827,8 @@ extern "C"
         }
     }
 
-    int EXPORT lokinet_udp_flow_send(
-        const struct lokinet_udp_flowinfo* remote, const void* ptr, size_t len, struct lokinet_context* ctx)
+    int EXPORT session_router_udp_flow_send(
+        const struct session_router_udp_flowinfo* remote, const void* ptr, size_t len, struct session_router_context* ctx)
     {
         if (remote == nullptr or remote->remote_port == 0 or ptr == nullptr or len == 0 or ctx == nullptr)
             return EINVAL;
@@ -873,11 +873,11 @@ extern "C"
         return EINVAL;
     }
 
-    int EXPORT lokinet_udp_establish(
-        lokinet_udp_create_flow_func create_flow,
+    int EXPORT session_router_udp_establish(
+        session_router_udp_create_flow_func create_flow,
         void* user,
-        const struct lokinet_udp_flowinfo* remote,
-        struct lokinet_context* ctx)
+        const struct session_router_udp_flowinfo* remote,
+        struct session_router_context* ctx)
     {
         if (create_flow == nullptr or remote == nullptr or ctx == nullptr)
             return EINVAL;
@@ -947,14 +947,14 @@ extern "C"
         return EINVAL;
     }
 
-    void EXPORT lokinet_set_syncing_logger(lokinet_logger_func func, lokinet_logger_sync sync, void* user)
+    void EXPORT session_router_set_syncing_logger(session_router_logger_func func, session_router_logger_sync sync, void* user)
     {
         llarp::log::clear_sinks();
         llarp::log::add_sink(std::make_shared<llarp::logging::CallbackSink_mt>(func, sync, user));
     }
 
-    void EXPORT lokinet_set_logger(lokinet_logger_func func, void* user)
+    void EXPORT session_router_set_logger(session_router_logger_func func, void* user)
     {
-        lokinet_set_syncing_logger(func, nullptr, user);
+        session_router_set_syncing_logger(func, nullptr, user);
     }
 }

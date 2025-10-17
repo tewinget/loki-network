@@ -23,7 +23,7 @@ namespace llarp::traffic_type
 namespace llarp::handlers
 {
     inline constexpr auto TUN = "tun"sv;
-    inline constexpr auto LOKI_RESOLVER = "lokinet"sv;
+    inline constexpr auto LOKI_RESOLVER = "session-router"sv;
 
     class TunEndpoint : public TunEPBase, public dns::Resolver_Base, public std::enable_shared_from_this<TunEndpoint>
     {
@@ -91,12 +91,12 @@ namespace llarp::handlers
 
         std::string get_if_name() const;
 
-        // Returns the lokinet tun IPv4 address
+        // Returns the Session Router tun IPv4 address
         const ipv4& get_ipv4() const;
-        // Returns the lokinet tun IPv6 address by pointer, or nullptr if ipv6 is not configured.
+        // Returns the Session Router tun IPv6 address by pointer, or nullptr if ipv6 is not configured.
         const ipv6* get_ipv6() const;
 
-        // Returns the lokinet tun IPv4 network; the address is set to this tun device's local
+        // Returns the Session Router tun IPv4 network; the address is set to this tun device's local
         // address (i.e. the .1 address).
         const ipv4_net& get_ipv4_network() const;
 
@@ -132,7 +132,7 @@ namespace llarp::handlers
         // bool handle_inbound_packet(IPPacket pkt, NetworkAddress remote, bool is_exit_session, bool
         // is_outbound_session);
 
-        // Obtains an available IPv4 address from the tun device and associates the given lokinet
+        // Obtains an available IPv4 address from the tun device and associates the given Session Router
         // remote address with it.  If the mapping already exists, this returns the existing IP,
         // otherwise it assigns a new one.  The association persists until unmapped.  Returns the
         // mapped ipv4 address, or nullptr if one could not be assigned.
@@ -158,7 +158,7 @@ namespace llarp::handlers
 
         void start_poller() override;
 
-        // Stores assigned IP's for each session in/out of this lokinet instance
+        // Stores assigned IP's for each session in/out of this Session Router instance
         //  - Reserved local addresses are directly pre-loaded from config
         //  - Persisting address map is directly pre-loaded from config
         address_map<ipv4> _local_ipv4_mapping;

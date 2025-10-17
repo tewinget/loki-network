@@ -1,1 +1,1 @@
-jni binding for lokinet vpn using android vpn api
+jni binding for sessionrouter vpn using android vpn api

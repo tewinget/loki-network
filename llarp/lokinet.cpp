@@ -7,7 +7,7 @@
 #include <llarp/util/logging.hpp>
 #include <llarp/util/logging/buffer.hpp>
 
-#include <lokinet.hpp>
+#include <session_router.hpp>
 #include <oxenc/base32z.h>
 
 #include <exception>
@@ -18,26 +18,26 @@ using namespace std::literals;
 
 namespace
 {
-    static auto logcat = llarp::log::Cat("liblokinet");
+    static auto logcat = llarp::log::Cat("libsessionrouter");
 }  // anonymous namespace
 
-namespace lokinet
+namespace session_router
 {
     static auto make_embedded_context() { return std::make_unique<llarp::Context>(/*embedded=*/true); }
 
-    Lokinet::Lokinet(std::string config, std::shared_ptr<oxen::quic::Loop> loop) : context{make_embedded_context()}
+    SessionRouter::SessionRouter(std::string config, std::shared_ptr<oxen::quic::Loop> loop) : context{make_embedded_context()}
     {
         context->start(llarp::Config{llarp::config::Type::EmbeddedClient, std::move(config)}, loop);
     }
 
-    Lokinet::Lokinet(path_ctor, const std::filesystem::path& config, std::shared_ptr<oxen::quic::Loop> loop)
+    SessionRouter::SessionRouter(path_ctor, const std::filesystem::path& config, std::shared_ptr<oxen::quic::Loop> loop)
         : context{make_embedded_context()}
     {
         ;
         context->start(llarp::Config{llarp::config::Type::EmbeddedClient, config}, loop);
     }
 
-    Lokinet::Lokinet(Network n, std::shared_ptr<oxen::quic::Loop> loop) : context{make_embedded_context()}
+    SessionRouter::SessionRouter(Network n, std::shared_ptr<oxen::quic::Loop> loop) : context{make_embedded_context()}
     {
         llarp::Config conf{llarp::config::Type::EmbeddedClient};
         switch (n)
@@ -49,28 +49,28 @@ namespace lokinet
                 conf.router.net_id = llarp::NetID::TESTNET;
                 break;
             default:
-                throw std::invalid_argument{"Unknown/unsupported network value passed to Lokinet constructor"};
+                throw std::invalid_argument{"Unknown/unsupported network value passed to Session Router constructor"};
         }
         context->start(std::move(conf), loop);
     }
 
-    Lokinet::~Lokinet()
+    SessionRouter::~SessionRouter()
     {
         context->stop();
         context->wait();
     }
 
-    void Lokinet::on_connected(std::function<void()> callback, bool persist)
+    void SessionRouter::on_connected(std::function<void()> callback, bool persist)
     {
         context->router->on_connected(std::move(callback), persist);
     }
 
-    void Lokinet::on_disconnected(std::function<void()> callback, bool persist)
+    void SessionRouter::on_disconnected(std::function<void()> callback, bool persist)
     {
         context->router->on_disconnected(std::move(callback), persist);
     }
 
-    void Lokinet::establish_udp(
+    void SessionRouter::establish_udp(
         std::string_view remote,
         uint16_t port,
         std::function<void(tunnel_info info)> on_established,
@@ -120,7 +120,7 @@ namespace lokinet
             });
     }
 
-    tunnel_info Lokinet::establish_udp_blocking(std::string_view remote, uint16_t port)
+    tunnel_info SessionRouter::establish_udp_blocking(std::string_view remote, uint16_t port)
     {
         std::promise<tunnel_info> prom;
         auto fut = prom.get_future();
@@ -142,4 +142,4 @@ namespace lokinet
         return fut.get();
     }
 
-}  // namespace lokinet
+}  // namespace Session Router

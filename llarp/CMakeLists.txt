@@ -1,33 +1,33 @@
 include(Version)
 
-# Add an internal lokinet static library target, enables LTO (if enabled) on the target,
-# and links it to the common lokinet-base interface.
-# Invoke with the target/library name (e.g. "lokinet-foo") and list of source files, e.g.
-#     lokinet_add_library(lokinet-foo foo/source1.cpp foo/source2.cpp)
-function(lokinet_add_library libname)
+# Add an internal Session Router static library target, enables LTO (if enabled) on the target,
+# and links it to the common session-router-base interface.
+# Invoke with the target/library name (e.g. "session-router-foo") and list of source files, e.g.
+#     session_router_add_library(session-router-foo foo/source1.cpp foo/source2.cpp)
+function(session_router_add_library libname)
     add_library(${libname} STATIC ${ARGN})
-    target_link_libraries(${libname} PUBLIC lokinet-base PRIVATE lokinet-base-internal)
+    target_link_libraries(${libname} PUBLIC session-router-base PRIVATE session-router-base-internal)
     enable_lto(${libname})
 endfunction()
 
-lokinet_add_library(lokinet-cryptography
+session_router_add_library(session-router-cryptography
   crypto/crypto.cpp
   crypto/key_manager.cpp
   crypto/keys.cpp
   crypto/types.cpp
 )
 
-if(LOKINET_FULL)
-  lokinet_add_library(lokinet-exit-auth
+if(SROUTER_FULL)
+  session_router_add_library(session-router-exit-auth
     auth/auth.cpp
     auth/file.cpp
     auth/session.cpp
   )
 endif()
 
-# Functional objects use by lokinet-core and other libraries
+# Functional objects use by session-router-core and other libraries
 # needed by vpn/ router/ rpc/ handlers/ net/ link/
-lokinet_add_library(lokinet-core-utils
+session_router_add_library(session-router-core-utils
   handlers/session.cpp
 
   messages/common.cpp
@@ -36,11 +36,11 @@ lokinet_add_library(lokinet-core-utils
   messages/path.cpp
 )
 
-if (LOKINET_FULL)
-  target_sources(lokinet-core-utils PRIVATE handlers/tun.cpp vpn/egres_packet_router.cpp)
+if (SROUTER_FULL)
+  target_sources(session-router-core-utils PRIVATE handlers/tun.cpp vpn/egres_packet_router.cpp)
 endif()
 
-lokinet_add_library(lokinet-core
+session_router_add_library(session-router-core
   context.cpp
   
   link/connection.cpp
@@ -52,16 +52,16 @@ lokinet_add_library(lokinet-core
   session/session.cpp
 )
 
-if (LOKINET_FULL)
-  target_sources(lokinet-core
+if (SROUTER_FULL)
+  target_sources(session-router-core
     PRIVATE
     router/route_poker.cpp
     consensus/reachability_testing.cpp
   )
 endif()
 
-if (LOKINET_FULL)
-  lokinet_add_library(lokinet-rpc
+if (SROUTER_FULL)
+  session_router_add_library(session-router-rpc
     rpc/json_binary_proxy.cpp
     rpc/json_conversions.cpp
     rpc/oxend_rpc.cpp
@@ -71,7 +71,7 @@ if (LOKINET_FULL)
 endif()
 
 # config, crypto, timeplace, nodedb, net, router
-lokinet_add_library(lokinet-utils
+session_router_add_library(session-router-utils
   ${CMAKE_CURRENT_BINARY_DIR}/constants/version.cpp
   util/buffer.cpp
   util/file.cpp
@@ -84,9 +84,9 @@ lokinet_add_library(lokinet-utils
   util/zstd.cpp
 )
 
-add_dependencies(lokinet-utils genversion)
+add_dependencies(session-router-utils genversion)
 
-lokinet_add_library(lokinet-contact
+session_router_add_library(session-router-contact
   contact/client_contact.cpp
   contact/client_intro.cpp
   contact/contactdb.cpp
@@ -96,15 +96,15 @@ lokinet_add_library(lokinet-contact
 )
 
 # Network interface files used for mediating ip traffic
-lokinet_add_library(lokinet-ip
+session_router_add_library(session-router-ip
   net/ip_packet.cpp
   net/policy.cpp
   net/utils.cpp
 )
 
-# Addressing and event loop files used by lokinet-core and other libraries
+# Addressing and event loop files used by session-router-core and other libraries
 # needed by rpc/ link/ config/ path/ dht/
-lokinet_add_library(lokinet-addressing
+session_router_add_library(session-router-addressing
   address/address.cpp
   address/ip_range.cpp
   address/utils.cpp
@@ -113,32 +113,32 @@ lokinet_add_library(lokinet-addressing
   ev/tcp.cpp
 )
 
-lokinet_add_library(lokinet-dns
+session_router_add_library(session-router-dns
   dns/srv_data.cpp
 )
 
-if (LOKINET_FULL)
-  # lokinet-platform holds all platform specific code
-  lokinet_add_library(lokinet-platform
+if (SROUTER_FULL)
+  # session-router-platform holds all platform specific code
+  session_router_add_library(session-router-platform
     vpn/packet_router.cpp
     vpn/platform.cpp
   )
 
   if (ANDROID)
-    target_sources(lokinet-platform PRIVATE android/ifaddrs.c util/nop_service_manager.cpp)
+    target_sources(session-router-platform PRIVATE android/ifaddrs.c util/nop_service_manager.cpp)
   endif()
 
   if(CMAKE_SYSTEM_NAME MATCHES "Linux")
-    target_sources(lokinet-platform PRIVATE linux/dbus.cpp)
+    target_sources(session-router-platform PRIVATE linux/dbus.cpp)
     if(WITH_SYSTEMD)
-      target_sources(lokinet-platform PRIVATE linux/sd_service_manager.cpp)
+      target_sources(session-router-platform PRIVATE linux/sd_service_manager.cpp)
     else()
-      target_sources(lokinet-platform PRIVATE util/nop_service_manager.cpp)
+      target_sources(session-router-platform PRIVATE util/nop_service_manager.cpp)
     endif()
   endif()
 
   if (WIN32)
-    target_sources(lokinet-platform PRIVATE
+    target_sources(session-router-platform PRIVATE
       net/win32.cpp
       vpn/win32.cpp
       win32/service_manager.cpp
@@ -147,20 +147,20 @@ if (LOKINET_FULL)
       win32/exception.cpp
       win32/wintun.cpp
       win32/windivert.cpp)
-    target_include_directories(lokinet-platform PRIVATE ${CMAKE_BINARY_DIR}/wintun/include/ ${CMAKE_BINARY_DIR}/WinDivert-${WINDIVERT_VERSION}/include/)
+    target_include_directories(session-router-platform PRIVATE ${CMAKE_BINARY_DIR}/wintun/include/ ${CMAKE_BINARY_DIR}/WinDivert-${WINDIVERT_VERSION}/include/)
   else()
-    target_sources(lokinet-platform PRIVATE
+    target_sources(session-router-platform PRIVATE
       net/posix.cpp)
   endif()
 
   if(APPLE)
     add_subdirectory(apple)
-    target_sources(lokinet-platform PRIVATE util/nop_service_manager.cpp)
+    target_sources(session-router-platform PRIVATE util/nop_service_manager.cpp)
   endif()
 
-  # lokinet-dns is the dns parsing and hooking library that we use to
+  # session-router-dns is the dns parsing and hooking library that we use to
   # parse modify and reconstitute dns wire proto, dns queries and RR
-  target_sources(lokinet-dns PRIVATE
+  target_sources(session-router-dns PRIVATE
     dns/message.cpp   # dns/server
     dns/name.cpp      # srv_data, question, rr
     dns/platform.cpp
@@ -172,38 +172,38 @@ if (LOKINET_FULL)
 
   # platform specific bits and bobs for setting dns
   if(WITH_SYSTEMD)
-    target_sources(lokinet-dns PRIVATE dns/nm_platform.cpp dns/sd_platform.cpp)
+    target_sources(session-router-dns PRIVATE dns/nm_platform.cpp dns/sd_platform.cpp)
   endif()
 endif()
 
-# lokinet-nodedb holds all types and logic for storing parsing and constructing
+# session-router-nodedb holds all types and logic for storing parsing and constructing
 # nodedb data published to the network and versions of it stored locally
-lokinet_add_library(lokinet-nodedb
+session_router_add_library(session-router-nodedb
   nodedb.cpp
   profiling.cpp # path, router, service::endpoint
 )
 
 set(BOOTSTRAP_FALLBACKS)
 foreach(bs IN ITEMS MAINNET TESTNET)
-  if(LOKINET_BOOTSTRAP_FALLBACK_${bs})
-    message(STATUS "Building with ${bs} fallback bootstrap path \"${LOKINET_BOOTSTRAP_FALLBACK_${bs}}\"")
-    file(READ "${LOKINET_BOOTSTRAP_FALLBACK_${bs}}" bs_data HEX)
+  if(SROUTER_BOOTSTRAP_FALLBACK_${bs})
+    message(STATUS "Building with ${bs} fallback bootstrap path \"${SROUTER_BOOTSTRAP_FALLBACK_${bs}}\"")
+    file(READ "${SROUTER_BOOTSTRAP_FALLBACK_${bs}}" bs_data HEX)
     string(REGEX REPLACE "([0-9a-f][0-9a-f])" "\\\\x\\1" bs_data "${bs_data}")
     set(BOOTSTRAP_FALLBACKS "${BOOTSTRAP_FALLBACKS}        {NetID::${bs}, \"${bs_data}\"sv},\n")
   endif()
 endforeach()
 configure_file("nodedb-bootstraps.cpp.in" "${CMAKE_CURRENT_BINARY_DIR}/nodedb-bootstraps.cpp" @ONLY)
-target_sources(lokinet-nodedb PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/nodedb-bootstraps.cpp")
+target_sources(session-router-nodedb PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/nodedb-bootstraps.cpp")
 
-# lokinet-config is for all configuration types and parsers
-lokinet_add_library(lokinet-config
+# session-router-config is for all configuration types and parsers
+session_router_add_library(session-router-config
   config/config.cpp
   config/definition.cpp
   config/ini.cpp
 )
 
-# All path objects; link directly to lokinet-core
-lokinet_add_library(lokinet-path
+# All path objects; link directly to session-router-core
+session_router_add_library(session-router-path
   path/build_stats.cpp
   path/hopid.cpp
   path/path.cpp
@@ -212,78 +212,78 @@ lokinet_add_library(lokinet-path
   path/transit_hop.cpp
 )
 
-if(LOKINET_DEBUG_PATH_SEED)
-  target_compile_definitions(lokinet-nodedb PRIVATE LOKINET_DEBUG_PATH_SEED)
-  target_compile_definitions(lokinet-config PRIVATE LOKINET_DEBUG_PATH_SEED)
-  target_compile_definitions(lokinet-path PRIVATE LOKINET_DEBUG_PATH_SEED)
+if(SROUTER_DEBUG_PATH_SEED)
+  target_compile_definitions(session-router-nodedb PRIVATE SROUTER_DEBUG_PATH_SEED)
+  target_compile_definitions(session-router-config PRIVATE SROUTER_DEBUG_PATH_SEED)
+  target_compile_definitions(session-router-path PRIVATE SROUTER_DEBUG_PATH_SEED)
 endif()
 
 # Link libraries to their internals
-target_link_libraries(lokinet-nodedb PUBLIC lokinet-addressing lokinet-cryptography)
-target_link_libraries(lokinet-contact PUBLIC lokinet-dns)
-if(LOKINET_FULL)
-  target_link_libraries(lokinet-rpc PUBLIC lokinet-contact lokinet-config)
+target_link_libraries(session-router-nodedb PUBLIC session-router-addressing session-router-cryptography)
+target_link_libraries(session-router-contact PUBLIC session-router-dns)
+if(SROUTER_FULL)
+  target_link_libraries(session-router-rpc PUBLIC session-router-contact session-router-config)
 endif()
-target_link_libraries(lokinet-addressing PUBLIC lokinet-utils lokinet-cryptography lokinet-contact lokinet-ip)
-target_link_libraries(lokinet-config PUBLIC lokinet-cryptography lokinet-addressing)
-if(LOKINET_FULL)
-  target_link_libraries(lokinet-platform PUBLIC lokinet-cryptography lokinet-ip)
-  target_link_libraries(lokinet-config PUBLIC lokinet-exit-auth)
+target_link_libraries(session-router-addressing PUBLIC session-router-utils session-router-cryptography session-router-contact session-router-ip)
+target_link_libraries(session-router-config PUBLIC session-router-cryptography session-router-addressing)
+if(SROUTER_FULL)
+  target_link_libraries(session-router-platform PUBLIC session-router-cryptography session-router-ip)
+  target_link_libraries(session-router-config PUBLIC session-router-exit-auth)
 endif()
-target_link_libraries(lokinet-dns
+target_link_libraries(session-router-dns
   PUBLIC
-  lokinet-cryptography
-  lokinet-config
+  session-router-cryptography
+  session-router-config
 )
-if(LOKINET_FULL)
-  target_link_libraries(lokinet-dns PUBLIC lokinet-platform)
+if(SROUTER_FULL)
+  target_link_libraries(session-router-dns PUBLIC session-router-platform)
 endif()
 
-target_link_libraries(lokinet-path
+target_link_libraries(session-router-path
   PUBLIC
-  lokinet-addressing
+  session-router-addressing
 )
 
-target_link_libraries(lokinet-core-utils 
+target_link_libraries(session-router-core-utils 
   PUBLIC 
-  lokinet-config
-  lokinet-dns
+  session-router-config
+  session-router-dns
 )
 
-if(LOKINET_FULL)
-  target_link_libraries(lokinet-core-utils
+if(SROUTER_FULL)
+  target_link_libraries(session-router-core-utils
     PUBLIC
-    lokinet-rpc
-    lokinet-platform
+    session-router-rpc
+    session-router-platform
   )
 endif()
 
-target_link_libraries(lokinet-cryptography
+target_link_libraries(session-router-cryptography
   PUBLIC
-  lokinet-libcrypt
+  session-router-libcrypt
 )
 
-if(LOKINET_FULL)
-  target_link_libraries(lokinet-exit-auth PUBLIC lokinet-core-utils lokinet-cryptography)
+if(SROUTER_FULL)
+  target_link_libraries(session-router-exit-auth PUBLIC session-router-core-utils session-router-cryptography)
 endif()
 
-target_link_libraries(lokinet-utils
+target_link_libraries(session-router-utils
   PUBLIC
-  lokinet-cryptography
+  session-router-cryptography
 )
 
-target_link_libraries(lokinet-core 
+target_link_libraries(session-router-core 
   PUBLIC 
-  lokinet-core-utils
-  lokinet-nodedb
-  lokinet-path
+  session-router-core-utils
+  session-router-nodedb
+  session-router-path
 )
-if(LOKINET_FULL)
-  target_link_libraries(lokinet-core PUBLIC lokinet-exit-auth)
+if(SROUTER_FULL)
+  target_link_libraries(session-router-core PUBLIC session-router-exit-auth)
 endif()
 
 
-target_link_libraries(lokinet-base 
+target_link_libraries(session-router-base 
   INTERFACE 
 
   Threads::Threads
@@ -295,8 +295,8 @@ target_link_libraries(lokinet-base
 )
 
 
-if(LOKINET_FULL)
-  target_link_libraries(lokinet-base INTERFACE libunbound oxenmq::oxenmq)
+if(SROUTER_FULL)
+  target_link_libraries(session-router-base INTERFACE libunbound oxenmq::oxenmq)
 endif()
 
 # libevent
@@ -306,37 +306,37 @@ if(NOT TARGET libevent::core)
   target_link_libraries(libevent_core INTERFACE PkgConfig::LIBEVENT_core)
   add_library(libevent::core ALIAS libevent_core)
 endif()
-target_link_libraries(lokinet-addressing PRIVATE libevent::core)
+target_link_libraries(session-router-addressing PRIVATE libevent::core)
 
 
 # libzstd
 if(TARGET libzstd::static)  # static dep or libsession-util's embedded static target
-    target_link_libraries(lokinet-utils PRIVATE libzstd::static)
+    target_link_libraries(session-router-utils PRIVATE libzstd::static)
 else()
     pkg_check_modules(LIBZSTD libzstd>=1.3 IMPORTED_TARGET REQUIRED)
-    target_link_libraries(lokinet-utils PRIVATE PkgConfig::LIBZSTD)
+    target_link_libraries(session-router-utils PRIVATE PkgConfig::LIBZSTD)
 endif()
 
 
-add_library(liblokinet lokinet.cpp)
-target_link_libraries(liblokinet PUBLIC lokinet-core)
+add_library(libsessionrouter session_router.cpp)
+target_link_libraries(libsessionrouter PUBLIC session-router-core)
 
-set_target_properties(liblokinet PROPERTIES OUTPUT_NAME lokinet)
-if(BUILD_SHARED_LIBS AND LOKINET_VERSION_SO)
-  set_target_properties(liblokinet PROPERTIES
+set_target_properties(libsessionrouter PROPERTIES OUTPUT_NAME session-router)
+if(BUILD_SHARED_LIBS AND SROUTER_VERSION_SO)
+  set_target_properties(libsessionrouter PROPERTIES
     VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}"
     SOVERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
 endif()
 
 if(WIN32)
-  target_link_libraries(liblokinet PUBLIC ws2_32 iphlpapi -fstack-protector)
-  install(TARGETS liblokinet DESTINATION bin COMPONENT liblokinet)
+  target_link_libraries(libsessionrouter PUBLIC ws2_32 iphlpapi -fstack-protector)
+  install(TARGETS libsessionrouter DESTINATION bin COMPONENT libsessionrouter)
 elseif(NOT APPLE)
   include(GNUInstallDirs)
-  install(TARGETS liblokinet LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT liblokinet)
+  install(TARGETS libsessionrouter LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT libsessionrouter)
 endif()
 
-add_library(lokinet::liblokinet ALIAS liblokinet)
+add_library(session-router::libsessionrouter ALIAS libsessionrouter)
 
 file(GLOB_RECURSE docs_SRC */*.hpp *.hpp)
 set(DOCS_SRC ${docs_SRC} PARENT_SCOPE)

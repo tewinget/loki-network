@@ -11,26 +11,26 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # Has to be set before `project()`, and ignored on non-macos:
 set(CMAKE_OSX_DEPLOYMENT_TARGET 10.15 CACHE STRING "macOS deployment target (Apple clang only)")
 
-set(lokinet_full_def ON)
+set(session-router_full_def ON)
 if(IOS)
-  set(lokinet_full_def OFF)
+  set(session-router_full_def OFF)
 endif()
 
-# These two are not exclusive: daemon requires full platform, but the main lokinet library itself
+# These two are not exclusive: daemon requires full platform, but the main session-router library itself
 # can support both.
-option(LOKINET_FULL "build with full client/relay support. Disabling this will only allow embedded lokinet usage" ${lokinet_full_def})
-option(LOKINET_DAEMON "build lokinet daemon and associated utils (requires LOKINET_FULL)" ${LOKINET_FULL})
+option(SROUTER_FULL "build with full client/relay support. Disabling this will only allow embedded session-router usage" ${session-router_full_def})
+option(SROUTER_DAEMON "build session-router daemon and associated utils (requires SROUTER_FULL)" ${SROUTER_FULL})
 
-if(LOKINET_DAEMON AND NOT LOKINET_FULL)
-  message(FATAL_ERROR "Cannot use LOKINET_DAEMON without LOKINET_FULL platform support!")
+if(SROUTER_DAEMON AND NOT SROUTER_FULL)
+  message(FATAL_ERROR "Cannot use SROUTER_DAEMON without SROUTER_FULL platform support!")
 endif()
 
-option(LOKINET_GRAPH_DEPENDENCIES "Produce graphviz representation of cmake dependencies" OFF)
+option(SROUTER_GRAPH_DEPENDENCIES "Produce graphviz representation of cmake dependencies" OFF)
 
-option(LOKINET_VERSION_SO "Add the project version to the shared library filename, e.g. liblokinet1.2.3.so instead of liblokinet.so" OFF)
+option(SROUTER_VERSION_SO "Add the project version to the shared library filename, e.g. libsession-router1.2.3.so instead of libsession-router.so" OFF)
 
 set(LANGS C CXX)
-if(APPLE AND LOKINET_DAEMON)
+if(APPLE AND SROUTER_DAEMON)
   set(LANGS ${LANGS} OBJC Swift)
 endif()
 
@@ -45,35 +45,35 @@ if(CCACHE_PROGRAM)
 endif()
 
 
-project(lokinet
+project(session-router
     VERSION 0.10.0
-    DESCRIPTION "lokinet - IP packet onion router"
+    DESCRIPTION "session-router - IP packet onion router"
     LANGUAGES ${LANGS})
 
 if(APPLE)
-    # Apple build number: must be incremented to submit a new build for the same lokinet version,
-    # should be reset to 0 when the lokinet version increments.
-    set(LOKINET_APPLE_BUILD 5)
+    # Apple build number: must be incremented to submit a new build for the same session-router version,
+    # should be reset to 0 when the session-router version increments.
+    set(SROUTER_APPLE_BUILD 5)
 endif()
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 # Core options
-option(LOKINET_AVX2 "enable avx2 code" OFF)
-option(LOKINET_NATIVE_BUILD "optimise for host system and FPU" ON)
-option(LOKINET_XSAN "use sanitiser, if your system has it (requires -DCMAKE_BUILD_TYPE=Debug)" OFF)
-option(LOKINET_JEMALLOC "Link to jemalloc for memory allocations, if found (requires non-static build)" ON)
-option(LOKINET_COVERAGE "generate coverage data" OFF)
-option(LOKINET_WARNINGS_AS_ERRORS "treat all warnings as errors. turn off for development, on for release" OFF)
-option(LOKINET_TESTS "build unit tests" OFF)
-option(LOKINET_HIVE "build simulation stubs" OFF)
-option(LOKINET_PACKAGE "builds extra components for making an installer (with 'make package')" OFF)
-option(LOKINET_PEERSTATS "build with experimental peerstats db support" OFF)
-option(LOKINET_STRIP "strip off all debug symbols into an external archive for all executables built" OFF)
-option(LOKINET_DEBUG_PATH_SEED "enable support for the debug-mode [paths]:debug-path-seed option for reproducible, non-random paths" OFF)
+option(SROUTER_AVX2 "enable avx2 code" OFF)
+option(SROUTER_NATIVE_BUILD "optimise for host system and FPU" ON)
+option(SROUTER_XSAN "use sanitiser, if your system has it (requires -DCMAKE_BUILD_TYPE=Debug)" OFF)
+option(SROUTER_JEMALLOC "Link to jemalloc for memory allocations, if found (requires non-static build)" ON)
+option(SROUTER_COVERAGE "generate coverage data" OFF)
+option(SROUTER_WARNINGS_AS_ERRORS "treat all warnings as errors. turn off for development, on for release" OFF)
+option(SROUTER_TESTS "build unit tests" OFF)
+option(SROUTER_HIVE "build simulation stubs" OFF)
+option(SROUTER_PACKAGE "builds extra components for making an installer (with 'make package')" OFF)
+option(SROUTER_PEERSTATS "build with experimental peerstats db support" OFF)
+option(SROUTER_STRIP "strip off all debug symbols into an external archive for all executables built" OFF)
+option(SROUTER_DEBUG_PATH_SEED "enable support for the debug-mode [paths]:debug-path-seed option for reproducible, non-random paths" OFF)
 
-set(LOKINET_BOOTSTRAP_FALLBACK_MAINNET "${PROJECT_SOURCE_DIR}/contrib/bootstrap/mainnet.signed" CACHE PATH "Fallback bootstrap path (mainnet)")
-set(LOKINET_BOOTSTRAP_FALLBACK_TESTNET "${PROJECT_SOURCE_DIR}/contrib/bootstrap/testnet.signed" CACHE PATH "Fallback bootstrap path (testnet)")
+set(SROUTER_BOOTSTRAP_FALLBACK_MAINNET "${PROJECT_SOURCE_DIR}/contrib/bootstrap/mainnet.signed" CACHE PATH "Fallback bootstrap path (mainnet)")
+set(SROUTER_BOOTSTRAP_FALLBACK_TESTNET "${PROJECT_SOURCE_DIR}/contrib/bootstrap/testnet.signed" CACHE PATH "Fallback bootstrap path (testnet)")
 
 include(cmake/enable_lto.cmake)
 
@@ -103,10 +103,10 @@ endif()
 # set(debug OFF)
 # if(CMAKE_BUILD_TYPE MATCHES "[Dd][Ee][Bb][Uu][Gg]")
 #   set(debug ON)
-#   add_definitions(-DLOKINET_DEBUG)
+#   add_definitions(-DSROUTER_DEBUG)
 # endif()
 
-option(LOKINET_WARN_DEPRECATED "show deprecation warnings" OFF)
+option(SROUTER_WARN_DEPRECATED "show deprecation warnings" OFF)
 
 include(CheckCXXSourceCompiles)
 include(CheckLibraryExists)
@@ -158,20 +158,20 @@ endif()
 find_package(PkgConfig REQUIRED)
 
 if(NOT TARGET sodium)
-  # Allow -DLOKINET_DOWNLOAD_SODIUM=FORCE to download without even checking for a local libsodium
-  option(LOKINET_DOWNLOAD_SODIUM "Allow libsodium to be downloaded and built locally if not found on the system" OFF)
-  if(NOT LOKINET_DOWNLOAD_SODIUM STREQUAL "FORCE" AND NOT BUILD_STATIC_DEPS)
+  # Allow -DSROUTER_DOWNLOAD_SODIUM=FORCE to download without even checking for a local libsodium
+  option(SROUTER_DOWNLOAD_SODIUM "Allow libsodium to be downloaded and built locally if not found on the system" OFF)
+  if(NOT SROUTER_DOWNLOAD_SODIUM STREQUAL "FORCE" AND NOT BUILD_STATIC_DEPS)
     pkg_check_modules(SODIUM libsodium>=1.0.18 IMPORTED_TARGET)
   endif()
 
   add_library(sodium INTERFACE)
-  if(SODIUM_FOUND AND NOT LOKINET_DOWNLOAD_SODIUM STREQUAL "FORCE" AND NOT BUILD_STATIC_DEPS)
+  if(SODIUM_FOUND AND NOT SROUTER_DOWNLOAD_SODIUM STREQUAL "FORCE" AND NOT BUILD_STATIC_DEPS)
     target_link_libraries(sodium INTERFACE PkgConfig::SODIUM)
   else()
-    if(NOT LOKINET_DOWNLOAD_SODIUM AND NOT BUILD_STATIC_DEPS)
-      message(FATAL_ERROR "Could not find libsodium >= 1.0.18; either install it on your system or use -DLOKINET_DOWNLOAD_SODIUM=ON to download and build an internal copy")
+    if(NOT SROUTER_DOWNLOAD_SODIUM AND NOT BUILD_STATIC_DEPS)
+      message(FATAL_ERROR "Could not find libsodium >= 1.0.18; either install it on your system or use -DSROUTER_DOWNLOAD_SODIUM=ON to download and build an internal copy")
     endif()
-    message(STATUS "Sodium >= 1.0.18 not found, but LOKINET_DOWNLOAD_SODIUM specified, so downloading it")
+    message(STATUS "Sodium >= 1.0.18 not found, but SROUTER_DOWNLOAD_SODIUM specified, so downloading it")
     include(DownloadLibSodium)
     target_link_libraries(sodium INTERFACE sodium_vendor)
   endif()
@@ -186,7 +186,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   list(APPEND warning_flags -Wno-unknown-warning-option)
 endif()
 
-if(LOKINET_WARNINGS_AS_ERRORS)
+if(SROUTER_WARNINGS_AS_ERRORS)
   list(APPEND warning_flags -Werror -Wno-error=array-bounds)
 endif()
 
@@ -198,18 +198,18 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_
 endif()
 list(APPEND warning_flags -Wno-deprecated-declarations)
 
-add_library(lokinet-base-internal_warnings INTERFACE)
+add_library(session-router-base-internal_warnings INTERFACE)
 
 # If we blindly add these directly as compile_options then they get passed to swiftc on Apple and
 # break, so we use a generate expression to set them only for C++/C/ObjC
-target_compile_options(lokinet-base-internal_warnings INTERFACE "$<$<OR:$<COMPILE_LANGUAGE:CXX>,$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:OBJC>>:${warning_flags}>")
+target_compile_options(session-router-base-internal_warnings INTERFACE "$<$<OR:$<COMPILE_LANGUAGE:CXX>,$<COMPILE_LANGUAGE:C>,$<COMPILE_LANGUAGE:OBJC>>:${warning_flags}>")
 
-if(LOKINET_XSAN)
-  string(APPEND CMAKE_CXX_FLAGS_DEBUG " -fsanitize=${LOKINET_XSAN} -fno-omit-frame-pointer -fno-sanitize-recover")
+if(SROUTER_XSAN)
+  string(APPEND CMAKE_CXX_FLAGS_DEBUG " -fsanitize=${SROUTER_XSAN} -fno-omit-frame-pointer -fno-sanitize-recover")
   foreach(type EXE MODULE SHARED STATIC)
-    string(APPEND CMAKE_${type}_LINKER_FLAGS_DEBUG " -fsanitize=${LOKINET_XSAN} -fno-omit-frame-pointer -fno-sanitize-recover")
+    string(APPEND CMAKE_${type}_LINKER_FLAGS_DEBUG " -fsanitize=${SROUTER_XSAN} -fno-omit-frame-pointer -fno-sanitize-recover")
   endforeach()
-  message(STATUS "Doing a ${LOKINET_XSAN} sanitizer build")
+  message(STATUS "Doing a ${SROUTER_XSAN} sanitizer build")
 endif()
 
 include(cmake/coverage.cmake)
@@ -220,14 +220,14 @@ if (WOW64_CROSS_COMPILE OR WIN64_CROSS_COMPILE)
 endif()
 
 if(NOT APPLE)
-  if(LOKINET_NATIVE_BUILD)
+  if(SROUTER_NATIVE_BUILD)
     if(CMAKE_SYSTEM_PROCESSOR STREQUAL ppc64le)
       add_compile_options(-mcpu=native -mtune=native)
     else()
       add_compile_options(-march=native -mtune=native)
     endif()
   elseif(NOT NON_PC_TARGET)
-    if (LOKINET_AVX2)
+    if (SROUTER_AVX2)
       add_compile_options(-march=haswell -mtune=haswell -mfpmath=sse)
     else()
       # Public binary releases
@@ -266,36 +266,36 @@ endif()
 add_subdirectory(external)
 
 # interface library for setting common includes, linkage and flags
-add_library(lokinet-base INTERFACE)
-target_include_directories(lokinet-base INTERFACE . include)
-target_link_libraries(lokinet-base INTERFACE oxen::quic fmt::fmt nlohmann_json::nlohmann_json)
+add_library(session-router-base INTERFACE)
+target_include_directories(session-router-base INTERFACE . include)
+target_link_libraries(session-router-base INTERFACE oxen::quic fmt::fmt nlohmann_json::nlohmann_json)
 
-target_compile_features(lokinet-base INTERFACE cxx_std_20)
+target_compile_features(session-router-base INTERFACE cxx_std_20)
 
-add_library(lokinet-base-internal INTERFACE)
-target_include_directories(lokinet-base-internal INTERFACE include/lokinet)
-if(NOT LOKINET_FULL)
-  target_compile_definitions(lokinet-base-internal INTERFACE LOKINET_EMBEDDED_ONLY)
+add_library(session-router-base-internal INTERFACE)
+target_include_directories(session-router-base-internal INTERFACE include/session_router)
+if(NOT SROUTER_FULL)
+  target_compile_definitions(session-router-base-internal INTERFACE SROUTER_EMBEDDED_ONLY)
 endif()
 
-target_link_libraries(lokinet-base-internal INTERFACE lokinet-base-internal_warnings)
+target_link_libraries(session-router-base-internal INTERFACE session-router-base-internal_warnings)
 
-if (TARGET lokinet_static_deps)
-  target_link_libraries(lokinet-base-internal INTERFACE lokinet_static_deps)
+if (TARGET session-router_static_deps)
+  target_link_libraries(session-router-base-internal INTERFACE session-router_static_deps)
 endif()
 
 if(WITH_SYSTEMD AND (NOT ANDROID))
   if(NOT SD_FOUND)
     message(FATAL_ERROR "libsystemd not found")
   endif()
-  target_link_libraries(lokinet-base INTERFACE PkgConfig::SD)
-  target_compile_definitions(lokinet-base INTERFACE WITH_SYSTEMD)
+  target_link_libraries(session-router-base INTERFACE PkgConfig::SD)
+  target_compile_definitions(session-router-base INTERFACE WITH_SYSTEMD)
 endif()
 
-if(LOKINET_JEMALLOC AND NOT STATIC_LINK)
+if(SROUTER_JEMALLOC AND NOT STATIC_LINK)
   pkg_check_modules(JEMALLOC jemalloc IMPORTED_TARGET)
   if(JEMALLOC_FOUND)
-    target_link_libraries(lokinet-base INTERFACE PkgConfig::JEMALLOC)
+    target_link_libraries(session-router-base INTERFACE PkgConfig::JEMALLOC)
   else()
     message(STATUS "jemalloc not found, not linking to jemalloc")
   endif()
@@ -305,25 +305,25 @@ endif()
 
 
 if(ANDROID)
-  target_link_libraries(lokinet-base INTERFACE log)
-  target_compile_definitions(lokinet-base INTERFACE ANDROID)
+  target_link_libraries(session-router-base INTERFACE log)
+  target_compile_definitions(session-router-base INTERFACE ANDROID)
   set(ANDROID_PLATFORM_SRC android/ifaddrs.c)
 endif()
 
-if(LOKINET_HIVE)
-  add_definitions(-DLOKINET_HIVE)
+if(SROUTER_HIVE)
+  add_definitions(-DSROUTER_HIVE)
 endif()
 
 add_subdirectory(llarp)
 
-if(LOKINET_DAEMON)
+if(SROUTER_DAEMON)
   add_subdirectory(daemon)
 endif()
 
-if(LOKINET_HIVE)
+if(SROUTER_HIVE)
   add_subdirectory(pybind)
 endif()
-if(LOKINET_TESTS OR LOKINET_HIVE)
+if(SROUTER_TESTS OR SROUTER_HIVE)
   add_subdirectory(test)
 endif()
 if(ANDROID)
@@ -334,12 +334,12 @@ add_subdirectory(docs)
 
 include(cmake/gui.cmake)
 
-if(APPLE AND LOKINET_FULL)
+if(APPLE AND SROUTER_FULL)
   macos_target_setup()
 endif()
 
-add_executable(liblokinet_jank_test EXCLUDE_FROM_ALL contrib/liblokinet_jank_test.cpp)
-target_link_libraries(liblokinet_jank_test PRIVATE liblokinet)
+add_executable(libsession-router_jank_test EXCLUDE_FROM_ALL contrib/libsession-router_jank_test.cpp)
+target_link_libraries(libsession-router_jank_test PRIVATE libsession-router)
 
 # uninstall target
 if(NOT TARGET uninstall)
@@ -352,7 +352,7 @@ if(NOT TARGET uninstall)
     COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
 endif()
 
-if(LOKINET_PACKAGE AND NOT APPLE)
+if(SROUTER_PACKAGE AND NOT APPLE)
   include(cmake/installer.cmake)
 endif()
 

@@ -1,4 +1,4 @@
-if (LOKINET_COVERAGE)
+if (SROUTER_COVERAGE)
   if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     add_compile_options( -fprofile-instr-generate -fcoverage-mapping )
     link_libraries( -fprofile-instr-generate )

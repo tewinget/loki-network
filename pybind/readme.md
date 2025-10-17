@@ -1,1 +1,1 @@
-pybind lokinet module for integration tests and network simulation
+pybind Session Router module for integration tests and network simulation

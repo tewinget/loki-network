@@ -1,5 +1,5 @@
-set(CPACK_PACKAGE_VENDOR "lokinet.org")
-set(CPACK_PACKAGE_HOMEPAGE_URL "https://lokinet.org/")
+set(CPACK_PACKAGE_VENDOR "getsession.org")
+set(CPACK_PACKAGE_HOMEPAGE_URL "https://getsession.org/")
 set(CPACK_RESOURCE_FILE_README "${PROJECT_SOURCE_DIR}/contrib/readme-installer.txt")
 set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE")
 
@@ -9,8 +9,8 @@ if(WIN32)
   install(FILES ${CMAKE_SOURCE_DIR}/contrib/configs/00-keyfile.ini DESTINATION share/conf.d COMPONENT keyfile_configs)
   install(FILES ${CMAKE_SOURCE_DIR}/contrib/configs/00-debug-log.ini DESTINATION share/conf.d COMPONENT debug_configs)
   get_cmake_property(CPACK_COMPONENTS_ALL COMPONENTS)
-  list(REMOVE_ITEM CPACK_COMPONENTS_ALL "Unspecified" "lokinet" "gui" "exit_configs" "keyfile_configs" "debug_configs")
-  list(APPEND CPACK_COMPONENTS_ALL "lokinet" "gui" "exit_configs" "keyfile_configs" "debug_configs")
+  list(REMOVE_ITEM CPACK_COMPONENTS_ALL "Unspecified" "session_router" "gui" "exit_configs" "keyfile_configs" "debug_configs")
+  list(APPEND CPACK_COMPONENTS_ALL "session_router" "gui" "exit_configs" "keyfile_configs" "debug_configs")
 elseif(APPLE)
   set(CPACK_GENERATOR DragNDrop;ZIP)
   get_cmake_property(CPACK_COMPONENTS_ALL COMPONENTS)
@@ -20,14 +20,14 @@ endif()
 include(CPack)
 
 if(WIN32)
-  cpack_add_component(lokinet
-    DISPLAY_NAME "lokinet"
-    DESCRIPTION "core required lokinet files"
+  cpack_add_component(session-router
+    DISPLAY_NAME "session-router"
+    DESCRIPTION "core required Session Router files"
     REQUIRED)
 
   cpack_add_component(gui
-    DISPLAY_NAME "lokinet gui"
-    DESCRIPTION "electron based control panel for lokinet")
+    DISPLAY_NAME "session-router gui"
+    DESCRIPTION "electron based control panel for Session Router")
 
   cpack_add_component(exit_configs
     DISPLAY_NAME "auto-enable exit"
@@ -36,7 +36,7 @@ if(WIN32)
 
   cpack_add_component(keyfile_configs
     DISPLAY_NAME "persist address"
-    DESCRIPTION "persist .loki address across restarts of lokinet\nnot recommended when enabling exit nodes"
+    DESCRIPTION "persist .loki address across restarts of Session Router\nnot recommended when enabling exit nodes"
     DISABLED)
 
   cpack_add_component(debug_configs

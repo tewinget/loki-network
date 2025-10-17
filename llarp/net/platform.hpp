@@ -20,7 +20,7 @@ namespace llarp::net
         Platform(const Platform&) = delete;
         Platform(Platform&&) = delete;
 
-        /// get a pointer to our singleton instance used by full lokinet instances.
+        /// get a pointer to our singleton instance used by full Session Router instances.
         /// embedded clients (and unit test mocks) will not call this
         static const Platform* Default_ptr();
 

@@ -4,8 +4,8 @@
 namespace llarp
 {
   // clang-format off
-  const std::array<uint8_t, 3> LOKINET_VERSION{{@lokinet_VERSION_MAJOR@, @lokinet_VERSION_MINOR@, @lokinet_VERSION_PATCH@}};
-  const char* const LOKINET_VERSION_TAG   = "@VERSIONTAG@";
-  const char* const LOKINET_VERSION_FULL  = "lokinet-@lokinet_VERSION_MAJOR@.@lokinet_VERSION_MINOR@.@lokinet_VERSION_PATCH@-@VERSIONTAG@";
+  const std::array<uint8_t, 3> SROUTER_VERSION{{@session_router_VERSION_MAJOR@, @session_router_VERSION_MINOR@, @session_router_VERSION_PATCH@}};
+  const char* const SROUTER_VERSION_TAG   = "@VERSIONTAG@";
+  const char* const SROUTER_VERSION_FULL  = "session-router-@session_router_VERSION_MAJOR@.@session_router_VERSION_MINOR@.@session_router_VERSION_PATCH@-@VERSIONTAG@";
   // clang-format on
 }  // namespace llarp

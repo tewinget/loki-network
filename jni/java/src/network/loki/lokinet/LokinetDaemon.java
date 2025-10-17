@@ -1,4 +1,4 @@
-package network.loki.lokinet;
+package network.loki.sessionrouter;
 
 import java.lang.Thread;
 import java.nio.ByteBuffer;
@@ -9,15 +9,15 @@ import android.util.Log;
 import android.content.Intent;
 import android.os.ParcelFileDescriptor;
 
-public class LokinetDaemon extends VpnService
+public class SessionRouterDaemon extends VpnService
 {
   static {
-    System.loadLibrary("lokinet-android");
+    System.loadLibrary("session-router-android");
   }
 
   private static native ByteBuffer Obtain();
   private static native void Free(ByteBuffer buf);
-  public native boolean Configure(LokinetConfig config);
+  public native boolean Configure(SessionRouterConfig config);
   public native int Mainloop();
   public native boolean IsRunning();
   public native boolean Stop();
@@ -29,7 +29,7 @@ public class LokinetDaemon extends VpnService
   public native String DumpStatus();
 
 
-  public static final String LOG_TAG = "LokinetDaemon";
+  public static final String LOG_TAG = "SessionRouterDaemon";
 
   ByteBuffer impl = null;
   ParcelFileDescriptor iface;
@@ -77,10 +77,10 @@ public class LokinetDaemon extends VpnService
       }
 
       String dataDir = getFilesDir().toString();
-      LokinetConfig config;
+      SessionRouterConfig config;
       try
       {
-        config = new LokinetConfig(dataDir);
+        config = new SessionRouterConfig(dataDir);
       }
       catch(RuntimeException ex)
       {
@@ -108,7 +108,7 @@ public class LokinetDaemon extends VpnService
 
       if (!config.Load())
       {
-        Log.e(LOG_TAG, "failed to load (or create) config file at: " + dataDir + "/lokinet.ini");
+        Log.e(LOG_TAG, "failed to load (or create) config file at: " + dataDir + "/sessionrouter.ini");
         return START_NOT_STICKY;
       }
 
@@ -129,7 +129,7 @@ public class LokinetDaemon extends VpnService
       // builder.addRoute("::", 0);
 
       builder.addDnsServer(upstreamDNS);
-      builder.setSession("Lokinet");
+      builder.setSession("SessionRouter");
       builder.setConfigureIntent(null);
 
       iface = builder.establish();

@@ -1,5 +1,5 @@
 
-to configure lokinet to be an exit add into `lokinet.ini`:
+to configure Session Router to be an exit add into `session_router.ini`:
 
     [router]
     min-connections=8
@@ -7,7 +7,7 @@ to configure lokinet to be an exit add into `lokinet.ini`:
 
     [network]
     exit=true
-    keyfile=/var/lib/lokinet/exit.private
+    keyfile=/var/lib/session-router/exit.private
     reachable=1
     ifaddr=10.0.0.1/16
     hops=2

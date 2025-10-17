@@ -74,7 +74,7 @@ namespace llarp
     {
         if (not _enabled)
         {
-            log::info(logcat, "Route poker is NOT enabled for this lokinet instance!");
+            log::info(logcat, "Route poker is NOT enabled for this Session Router instance!");
             return;
         }
 

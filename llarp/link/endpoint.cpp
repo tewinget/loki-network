@@ -53,7 +53,7 @@ namespace llarp::link
     void relay_conn::close_redundant() { close_quietly(not inbound_wins); }
 
     static std::vector<uint8_t> make_static_secret(
-        const Ed25519SecretKey& sk, std::string_view static_secret_key = "Lokinet static shared secret key"sv)
+        const Ed25519SecretKey& sk, std::string_view static_secret_key = "Session Router static shared secret key"sv)
     {
         std::vector<uint8_t> secret;
         secret.resize(32);

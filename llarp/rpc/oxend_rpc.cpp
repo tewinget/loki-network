@@ -149,13 +149,13 @@ namespace llarp::rpc
 
         nlohmann::json payload = {
             {"pubkey_ed25519", oxenc::to_hex(pk.begin(), pk.end())},
-            {"version", {LOKINET_VERSION[0], LOKINET_VERSION[1], LOKINET_VERSION[2]}}};
+            {"version", {SROUTER_VERSION[0], SROUTER_VERSION[1], SROUTER_VERSION[2]}}};
 
         if (auto err = _router.OxendErrorState())
             payload["error"] = *err;
 
         request(
-            "admin.lokinet_ping",
+            "admin.session_router_ping",
             [](bool success, std::vector<std::string> /* data */) {
                 log::debug(logcat, "Received response for ping. Successful: {}", success);
             },
@@ -215,7 +215,7 @@ namespace llarp::rpc
     void OxendRPC::inform_connection(RouterID router, bool success)
     {
         _router.loop.call([router, success, this]() {
-            const nlohmann::json req = {{"passed", success}, {"pubkey", router.ToHex()}, {"type", "lokinet"}};
+            const nlohmann::json req = {{"passed", success}, {"pubkey", router.ToHex()}, {"type", "srouter"}};
             request(
                 "admin.report_peer_status",
                 [](bool success, std::vector<std::string>) {
