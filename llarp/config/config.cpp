@@ -895,7 +895,7 @@ namespace llarp
 #ifdef __linux__
 #ifdef WITH_SYSTEMD
             // when we have systemd support add a random high port on loopback as well
-            // see https://github.com/oxen-io/Session Router/issues/1887#issuecomment-1091897282
+            // see https://github.com/oxen-io/lokinet/issues/1887#issuecomment-1091897282
             Default{"127.0.0.1:0"},
 #endif
             Default{"127.3.2.1:53"},
