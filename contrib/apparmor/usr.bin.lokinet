@@ -1,7 +1,7 @@
 # Last Modified: Fri 05 Feb 2021 08:13:58 PM UTC
 #include <tunables/global>
 
-profile lokinet /usr/bin/lokinet {
+profile session_router /usr/bin/session_router {
   #include <abstractions/base>
   #include <abstractions/nameservice>
 
@@ -14,12 +14,12 @@ profile lokinet /usr/bin/lokinet {
 
   /etc/loki/session_router.ini r,
   /dev/net/tun rw,
-  /usr/bin/lokinet mr,
+  /usr/bin/session_router mr,
 
-  owner /{var/,}lib/lokinet/ rw,
-  owner /{var/,}lib/lokinet/** rwk,
-  owner ${HOME}/.lokinet/ rw,
-  owner ${HOME}/.lokinet/** rwk,
+  owner /{var/,}lib/session_router/ rw,
+  owner /{var/,}lib/session_router/** rwk,
+  owner ${HOME}/.session_router/ rw,
+  owner ${HOME}/.session_router/** rwk,
   owner @{PROC}/@{pid}/task/@{pid}/comm rw,
   owner /tmp/session_router.*/{**,} rw,
 

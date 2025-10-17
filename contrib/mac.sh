@@ -18,10 +18,10 @@ fi
 ./contrib/mac-configure.sh "$@"
 
 cd build-mac
-rm -rf Lokinet\ *
+rm -rf SessionRouter\ *
 ninja -j${JOBS:-1} dmg
 cd ..
 
 echo -e "Build complete, your app is here:\n"
-ls -lad $(pwd)/build-mac/Lokinet\ *
+ls -lad $(pwd)/build-mac/SessionRouter\ *
 echo ""

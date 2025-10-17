@@ -1,4 +1,4 @@
-[Allow lokinet to set DNS settings]
-Identity=unix-user:_lokinet
+[Allow session_router to set DNS settings]
+Identity=unix-user:_session_router
 Action=org.freedesktop.resolve1.set-dns-servers;org.freedesktop.resolve1.set-domains
 ResultAny=yes

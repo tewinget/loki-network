@@ -1,10 +1,10 @@
 Session Router now talks to systemd directly via sdbus to set up DNS, but in order for this to work the
-user running lokinet (assumed `_lokinet` in these example files) needs permission to set dns servers
+user running session_router (assumed `_session_router` in these example files) needs permission to set dns servers
 and domains.
 
 To set up the permissions:
 
-- If lokinet is running as some user other than `_lokinet` the change the `_lokinet` username inside
+- If session_router is running as some user other than `_session_router` the change the `_session_router` username inside
   `session_router.rules` and `session_router.pkla`.
 
 - If on a Debian or Debian-derived distribution (such as Ubuntu) using polkit 105,

@@ -58,10 +58,10 @@ elif [ -e build-docs ]; then
     tar cJvf "$archive" "$base"
 elif [ -e build-mac ]; then
     archive="$base.tar.xz"
-    mv build-mac/Lokinet*/ "$base"
+    mv build-mac/SessionRouter*/ "$base"
     tar cJvf "$archive" "$base"
 else
-    cp -av build/daemon/lokinet{,-cntrl} "$base"
+    cp -av build/daemon/session_router{,-cntrl} "$base"
     cp -av contrib/bootstrap/mainnet.signed "$base/bootstrap.signed"
     # tar dat shiz up yo
     archive="$base.tar.xz"

@@ -6,5 +6,5 @@ project(udptest LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 add_executable(udptest udptest.cpp)
 include_directories(../../include)
-target_link_libraries(udptest PUBLIC lokinet)
+target_link_libraries(udptest PUBLIC session_router)
 

@@ -17,7 +17,7 @@ bool _run{true};
 using Session_Router_ptr = std::shared_ptr<session_router_context>;
 
 [[nodiscard]] auto
-MakeLokinet(const std::vector<char>& bootstrap)
+MakeSessionRouter(const std::vector<char>& bootstrap)
 {
   auto ctx = std::shared_ptr<session_router_context>(session_router_context_new(), session_router_context_free);
   if (auto err = session_router_add_bootstrap_rc(bootstrap.data(), bootstrap.size(), ctx.get()))
@@ -156,7 +156,7 @@ main(int argc, char* argv[])
 
   std::cout << "starting up" << std::endl;
 
-  recip = MakeLokinet(bootstrap);
+  recip = MakeSessionRouter(bootstrap);
   WaitForReady(recip);
 
   session_router_udp_bind_result recipBindResult{};
@@ -178,7 +178,7 @@ main(int argc, char* argv[])
 
   std::cout << "bound recip udp" << std::endl;
 
-  sender = MakeLokinet(bootstrap);
+  sender = MakeSessionRouter(bootstrap);
   WaitForReady(sender);
 
   std::string recipaddr{session_router_address(recip.get())};

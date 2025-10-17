@@ -9,7 +9,7 @@ import os
 
 lib_file = os.path.join(os.path.realpath('.'), 'libsessionrouter.so')
 
-class LokiNET(threading.Thread):
+class SessionRouter(threading.Thread):
 
     lib = None
     ctx = None
@@ -22,12 +22,12 @@ class LokiNET(threading.Thread):
 
     def inform_fail(self):
         """
-        inform lokinet crashed
+        inform session_router crashed
         """
 
     def inform_end(self):
         """
-        inform lokinet ended clean
+        inform session_router ended clean
         """
 
 
@@ -48,7 +48,7 @@ class LokiNET(threading.Thread):
             self.lib.llarp_main_free(self.ctx)
 
 def main():
-    loki = LokiNET()
+    loki = SessionRouter()
     if loki.load(lib_file, b'daemon.ini'):
         if loki.configure():
             loki.start()

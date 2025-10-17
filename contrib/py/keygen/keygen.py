@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-keygen tool for lokinet
+keygen tool for session_router
 """
 
 from argparse import ArgumentParser as AP

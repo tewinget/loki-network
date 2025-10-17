@@ -18,7 +18,7 @@ int main(int argc, char** argv)
 
     std::string target{argv[1]};
 
-    lokinet::Session Router loki{std::filesystem::path{"session_router.ini"}};
+    session_router::Session Router loki{std::filesystem::path{"session_router.ini"}};
 
     std::promise<void> prom;
     loki.on_connected([&] {

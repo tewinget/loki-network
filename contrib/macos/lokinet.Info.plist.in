@@ -6,7 +6,7 @@
 		<string>en</string>
 
 		<key>CFBundleExecutable</key>
-		<string>Lokinet</string>
+		<string>SessionRouter</string>
 
 		<key>CFBundleIdentifier</key>
 		<string>org.session</string>
@@ -15,7 +15,7 @@
 		<string>6.0</string>
 
 		<key>CFBundleName</key>
-		<string>Lokinet</string>
+		<string>SessionRouter</string>
 
 		<key>CFBundleIconFile</key>
 		<string>icon.icns</string>
