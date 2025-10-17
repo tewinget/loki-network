@@ -16,13 +16,8 @@
 
 #define STRINGIZER(version) #version
 
-#ifdef LLARP_RELEASE_MOTTO
-#define VERSION_STRING(version, codename, revision) \
-  STRINGIZER(version) "-release [" STRINGIZER(codename) "] (rev-" STRINGIZER(revision) ")"
-#else
 #define VERSION_STRING(version, revision) \
   STRINGIZER(version) STRINGIZER(revision)
-#endif
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 #ifdef _WIN32
