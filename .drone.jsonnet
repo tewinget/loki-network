@@ -447,7 +447,6 @@ local docs_pipeline(name, image, extra_cmds=[], allow_fail=false) = {
                   cmake_extra='-DBUILD_STATIC_DEPS=ON -DBUILD_SHARED_LIBS=OFF -DSTATIC_LINK=ON ' +
                               '-DCMAKE_CXX_FLAGS="-march=x86-64 -mtune=haswell" ' +
                               '-DCMAKE_C_FLAGS="-march=x86-64 -mtune=haswell" ' +
-                              '-DOXEN_LOGGING_FORCE_SUBMODULES=ON ' +
                               '-DNATIVE_BUILD=OFF -DWITH_SYSTEMD=OFF -DWITH_BOOTSTRAP=OFF -DBUILD_LIBLOKINET=OFF',
                   extra_cmds=[
                     './contrib/ci/drone-check-static-libs.sh',
