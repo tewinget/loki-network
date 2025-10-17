@@ -1,34 +1,34 @@
-# Lokinet
+# SessionRouter
 
 [English](readme.md) [Español](readme_es.md)
 
-Lokinet - реализация LLARP (протокол анонимной маршрутизации с малой задержкой), протокола трёхуровневой луковой маршрутизации.
+SessionRouter - реализация LLARP (протокол анонимной маршрутизации с малой задержкой), протокола трёхуровневой луковой маршрутизации.
 
 Почитать о дизайне высокого уровня LLARP [здесь](docs/high-level.txt)
 
 Почитать спецификацию протокола LLARP [здесь](docs/proto_v0.txt)
 
-Почитать документацию о том, как начать работу [здесь](https://oxen-io.github.io/loki-docs/Lokinet/LokinetOverview/)
+Почитать документацию о том, как начать работу [здесь](https://oxen-io.github.io/loki-docs/SessionRouter/SessionRouterOverview/)
 
-[![Build Status](https://drone.lokinet.dev/api/badges/oxen-io/lokinet/status.svg?ref=refs/heads/master)](https://drone.lokinet.dev/oxen-io/lokinet)
+[![Build Status](https://drone.session_router.dev/api/badges/oxen-io/session_router/status.svg?ref=refs/heads/master)](https://drone.session_router.dev/oxen-io/session_router)
 
 ## Использование
 
-О том как начать работу см. [Документацию](https://oxen-io.github.io/loki-docs/Lokinet/LokinetOverview/)
+О том как начать работу см. [Документацию](https://oxen-io.github.io/loki-docs/SessionRouter/SessionRouterOverview/)
 
-Также прочтите [Public Testing Guide](https://lokidocs.com/Lokinet/Guides/PublicTestingGuide/#1-lokinet-installation) для установки и другой полезной информации.
+Также прочтите [Public Testing Guide](https://lokidocs.com/SessionRouter/Guides/PublicTestingGuide/#1-session_router-installation) для установки и другой полезной информации.
 
 ### Создание стандартной конфигурации
 
 настроить как клиент:
 
-    $ lokinet -g
-    $ lokinet-bootstrap
+    $ session_router -g
+    $ session_router-bootstrap
 
 настроить как транслятор:
 
-    $ lokinet -r -g
-    $ lokinet-bootstrap
+    $ session_router -r -g
+    $ session_router-bootstrap
 
 
 ## Запуск в Linux
@@ -37,17 +37,17 @@ Lokinet - реализация LLARP (протокол анонимной мар
 
 для запуска, после создания конфигурации:
 
-    $ lokinet
+    $ session_router
 
 ## Запуск в macOS/UNIX/BSD
 
 ** ВЫ ДОЛЖНЫ ЗАПУСКАТЬ С ПРАВАМИ СУПЕРПОЛЬЗОВАТЕЛЯ **, запускайте с помощью `sudo`. Для создания интерфейса виртуального туннеля необходимы повышенные привилегии.
 
-Установщик macOS помещает исполняемые файлы (`lokinet` и` lokinet-bootstrap`) в `/usr/local/bin`, благодаря этому вы можете легко использовать исполняемые файлы в своем терминале. Установщик также уничтожает вашу предыдущую конфигурацию и ключи, устанавливает новую конфигурацию и загружает актуальную версию bootstrap.
+Установщик macOS помещает исполняемые файлы (`session_router` и` session_router-bootstrap`) в `/usr/local/bin`, благодаря этому вы можете легко использовать исполняемые файлы в своем терминале. Установщик также уничтожает вашу предыдущую конфигурацию и ключи, устанавливает новую конфигурацию и загружает актуальную версию bootstrap.
 
 для запуска, после создания конфигурации:
 
-    $ sudo lokinet
+    $ sudo session_router
 
 ## Запуск в Windows
 
@@ -72,8 +72,8 @@ Lokinet - реализация LLARP (протокол анонимной мар
 сборка:
 
     $ sudo apt install build-essential cmake git libcap-dev curl libuv1-dev libsodium-dev pkg-config
-    $ git clone --recursive https://github.com/oxen-io/lokinet
-    $ cd lokinet
+    $ git clone --recursive https://github.com/oxen-io/session_router
+    $ cd session_router
     $ mkdir build
     $ cd build
     $ cmake .. -DBUILD_STATIC_DEPS=ON -DBUILD_SHARED_LIBS=OFF -DSTATIC_LINK=ON
@@ -88,8 +88,8 @@ Lokinet - реализация LLARP (протокол анонимной мар
 сборка:
     убедитесь, что у вас установлены инструменты командной строки cmake, libuv и xcode
 
-    $ git clone --recursive https://github.com/oxen-io/lokinet
-    $ cd lokinet
+    $ git clone --recursive https://github.com/oxen-io/session_router
+    $ cd session_router
     $ mkdir build
     $ cd build
     $ cmake .. -DBUILD_STATIC_DEPS=ON -DBUILD_SHARED_LIBS=OFF -DSTATIC_LINK=ON
@@ -114,11 +114,11 @@ Lokinet - реализация LLARP (протокол анонимной мар
 
 сборка:
 
-    $ git clone --recursive https://github.com/oxen-io/lokinet
-    $ cd lokinet
+    $ git clone --recursive https://github.com/oxen-io/session_router
+    $ cd session_router
     $ mkdir build-windows
     $ cd build-windows
-    $ cmake -DBUILD_STATIC_DEPS=ON -DLOKINET_NATIVE_BUILD=OFF -DCMAKE_BUILD_TYPE=Release -DLOKINET_PACKAGE=ON -DCMAKE_TOOLCHAIN_FILE='../contrib/cross/mingw64.cmake' -DLOKINET_TESTS=OFF -DCMAKE_CROSSCOMPILING=ON ..
+    $ cmake -DBUILD_STATIC_DEPS=ON -DSROUTER_NATIVE_BUILD=OFF -DCMAKE_BUILD_TYPE=Release -DSROUTER_PACKAGE=ON -DCMAKE_TOOLCHAIN_FILE='../contrib/cross/mingw64.cmake' -DSROUTER_TESTS=OFF -DCMAKE_CROSSCOMPILING=ON ..
     $ cpack -D CPACK_MONOLITHIC_INSTALL=1 -G NSIS ..
 
 ### Solaris 2.10+
@@ -134,8 +134,8 @@ Lokinet - реализация LLARP (протокол анонимной мар
     $ sudo pkg install build-essential gcc8 wget tuntap cmake (optional: ninja ccache - from omnios extra) (OmniOS CE)
     $ sudo pkg install base-developer-utilities developer-gnu developer-studio-utilities gcc-7 wget cmake (Oracle Solaris, see note)
     $ sudo pkg install build-essential wget gcc-8 documentation/tuntap header-tun tun (optional: ninja ccache) (all other SunOS)
-    $ git clone --recursive https://github.com/oxen-io/lokinet
-    $ cd lokinet
+    $ git clone --recursive https://github.com/oxen-io/session_router
+    $ cd session_router
     $ mkdir build
     $ cd build
     $ cmake ..
@@ -150,8 +150,8 @@ Lokinet - реализация LLARP (протокол анонимной мар
 сборка:
 
     $ pkg install cmake git curl libuv libsodium pkgconf libunbound
-    $ git clone --recursive https://github.com/oxen-io/lokinet
-    $ cd lokinet
+    $ git clone --recursive https://github.com/oxen-io/session_router
+    $ cd session_router
     $ mkdir build
     $ cmake -DCMAKE_BUILD_TYPE=Release ..
     $ make

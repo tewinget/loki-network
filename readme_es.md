@@ -1,23 +1,23 @@
-# Lokinet
+# SessionRouter
 
 [Ingles](readme.md)
 
-Lokinet es la implementación referente de LLARP (low latency anonymous routing protocol, protocolo de enrutado anónimo de baja latencia), un protocolo de enrutado onion de capa 3.
+SessionRouter es la implementación referente de LLARP (low latency anonymous routing protocol, protocolo de enrutado anónimo de baja latencia), un protocolo de enrutado onion de capa 3.
 
 Puede aprender a grandes razgos sobre el diseño de LLARP [aquí](docs/high-level.txt) , documento en idioma ingles.
 
 Y puede leer las especificaciones del protocolo [aquí](docs/proto_v0.txt) , documento técnico en idioma ingles.
 
-Puede ver la documentación, en ingles, de como empezar [aqui](https://oxen-io.github.io/loki-docs/Lokinet/LokinetOverview/) .
+Puede ver la documentación, en ingles, de como empezar [aqui](https://oxen-io.github.io/loki-docs/SessionRouter/SessionRouterOverview/) .
 
-[![Build Status](https://ci.oxen.rocks/api/badges/oxen-io/lokinet/status.svg?ref=refs/heads/dev)](https://ci.oxen.rocks/oxen-io/lokinet)
+[![Build Status](https://ci.oxen.rocks/api/badges/oxen-io/session_router/status.svg?ref=refs/heads/dev)](https://ci.oxen.rocks/oxen-io/session_router)
 
 
 ## Uso
 
-Vea, en ingles, [documentación](https://oxen-io.github.io/loki-docs/Lokinet/LokinetOverview/) en como comenzar.
+Vea, en ingles, [documentación](https://oxen-io.github.io/loki-docs/SessionRouter/SessionRouterOverview/) en como comenzar.
 
-También lea, en ingles, [La guia de pruebas publicas](https://lokidocs.com/Lokinet/Guides/PublicTestingGuide/#1-lokinet-installation) para la instalación y mas información util.
+También lea, en ingles, [La guia de pruebas publicas](https://lokidocs.com/SessionRouter/Guides/PublicTestingGuide/#1-session_router-installation) para la instalación y mas información util.
 
 ## Corriendo en Linux
 
@@ -25,40 +25,40 @@ También lea, en ingles, [La guia de pruebas publicas](https://lokidocs.com/Loki
 
 para ejecutar como cliente:
 
-    $ lokinet -g
-    $ lokinet-bootstrap
-    $ lokinet
+    $ session_router -g
+    $ session_router-bootstrap
+    $ session_router
 
 para correr un relay:
 
-    $ lokinet -r -g
-    $ lokinet-bootstrap
-    $ lokinet
+    $ session_router -r -g
+    $ session_router-bootstrap
+    $ session_router
 
 ## Corriendo en macOS/UNIX/BSD
 
 **USTED TIENE QUE CORRER COMO ROOT**, correr usando sudo. Los privilegios elevados son necesarios para crear una interfaz de tunel virtual.
 
-El instalador de macOS coloca los binarios normales (`lokinet` y `lokinet-bootstrap`) en `/usr/local/bin` los que pudieran estar en ruta, asi que usted puede usar los binarios facilmente desde su terminal. El instalador tambien truena sus configuraciones y llaves previas, y descarga la semilla de arranque mas actual.
+El instalador de macOS coloca los binarios normales (`session_router` y `session_router-bootstrap`) en `/usr/local/bin` los que pudieran estar en ruta, asi que usted puede usar los binarios facilmente desde su terminal. El instalador tambien truena sus configuraciones y llaves previas, y descarga la semilla de arranque mas actual.
 
 para correr como cliente:
 
-    $ lokinet -g
-    $ lokinet-bootstrap
-    $ sudo lokinet
+    $ session_router -g
+    $ session_router-bootstrap
+    $ sudo session_router
 
 para correr como relay:
 
-    $ lokinet -r -g
-    $ lokinet-bootstrap
-    $ sudo lokinet
+    $ session_router -r -g
+    $ session_router-bootstrap
+    $ sudo session_router
 
 
 ## Corriendo en Windows:
 
 **NO CORRER COMO USUARIO ELEVADO**, correr como un usuario normal.
 
-para correr como usuario, correr el archivo en lote `run-lokinet.bat` como su usuario normal.
+para correr como usuario, correr el archivo en lote `run-session_router.bat` como su usuario normal.
 
 
 ## Compilando
@@ -81,8 +81,8 @@ Requerimientos de compilación:
 compilando:
 
     $ sudo apt install build-essential cmake git libcap-dev curl libuv1-dev libsodium-dev pkg-config
-    $ git clone --recursive https://github.com/oxen-io/lokinet
-    $ cd lokinet
+    $ git clone --recursive https://github.com/oxen-io/session_router
+    $ cd session_router
     $ mkdir build
     $ cd build
     $ cmake .. -DBUILD_STATIC_DEPS=ON -DBUILD_SHARED_LIBS=OFF -DSTATIC_LINK=ON
@@ -104,8 +104,8 @@ esto coloca el paquete compilado en `../`
 compilando:
     este seguro que usted tiene cmake, libuv y las herramientas de terminal de xcode ya instaladas
 
-     $ git clone --recursive https://github.com/oxen-io/lokinet
-    $ cd lokinet
+     $ git clone --recursive https://github.com/oxen-io/session_router
+    $ cd session_router
     $ mkdir build
     $ cd build
     $ cmake .. -DBUILD_STATIC_DEPS=ON -DBUILD_SHARED_LIBS=OFF -DSTATIC_LINK=ON
@@ -120,12 +120,12 @@ instalando:
 compilar (donde `$ARCH` es su plataforma - `i686` or `x86_64`):
 
     $ pacman -Sy base-devel mingw-w64-$ARCH-toolchain git libtool autoconf mingw-w64-$ARCH-cmake
-    $ git clone https://github.com/oxen-io/lokinet.git
-    $ cd lokinet
+    $ git clone https://github.com/oxen-io/session_router.git
+    $ cd session_router
     $ mkdir -p build; cd build
     $ cmake .. -DCMAKE_BUILD_TYPE=[Debug|Release] -DSTATIC_LINK_RUNTIME=ON -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -G 'Unix Makefiles'
 
-instalando (con priviligios elevados) en `$PROGRAMFILES/lokinet` o `$ProgramFiles(x86)/lokinet`:
+instalando (con priviligios elevados) en `$PROGRAMFILES/session_router` o `$ProgramFiles(x86)/session_router`:
 
     $ make install
 
@@ -150,8 +150,8 @@ compilando:
     $ sudo pkg install build-essential gcc8 wget tuntap cmake (opcional: ninja ccache - de los extra de omnios) (OmniOS CE)
     $ sudo pkg install base-developer-utilities developer-gnu developer-studio-utilities gcc-7 wget cmake (Solaris de Oracle, ver notas)
     $ sudo pkg install build-essential wget gcc-8 documentation/tuntap header-tun tun (opcional: ninja ccache) (todos los demas SunOS)
-    $ git clone https://github.com/oxen-io/lokinet
-    $ cd lokinet
+    $ git clone https://github.com/oxen-io/session_router
+    $ cd session_router
     $ gmake -j8
 
 instalando:
@@ -168,8 +168,8 @@ PENDIENTE: agregar instrucciones para pkgsrc
 compilando:
 
     # pkg_add curl cmake git (opcional: ninja ccache)
-    $ git clone --recursive https://github.com/oxen-io/lokinet
-    $ cd lokinet
+    $ git clone --recursive https://github.com/oxen-io/session_router
+    $ cd session_router
     $ mkdir build
     $ cd build
     $ cmake .. -DBUILD_STATIC_DEPS=ON -DBUILD_SHARED_LIBS=OFF -DSTATIC_LINK=ON
@@ -184,8 +184,8 @@ instalando (root):
 compilando:
 
     $ pkg install cmake git curl libuv-1.27.0 libsodium
-    $ git clone --recursive https://github.com/oxen-io/lokinet
-    $ cd lokinet
+    $ git clone --recursive https://github.com/oxen-io/session_router
+    $ cd session_router
     $ mkdir build
     $ cd build
     $ cmake .. -DBUILD_STATIC_DEPS=ON -DBUILD_SHARED_LIBS=OFF -DSTATIC_LINK=ON
