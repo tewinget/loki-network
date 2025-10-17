@@ -30,8 +30,8 @@ namespace llarp
     using SectionValues = llarp::ConfigParser::SectionValues;
     using ConfigMap = llarp::ConfigParser::ConfigMap;
 
-    inline constexpr uint16_t DEFAULT_CLIENT_PORT{1091};
-    inline constexpr uint16_t DEFAULT_RELAY_PORT{1090};
+    inline constexpr uint16_t DEFAULT_CLIENT_PORT{1191};
+    inline constexpr uint16_t DEFAULT_RELAY_PORT{1190};
     inline const quic::Address DEFAULT_CLIENT_ADDR{"0.0.0.0", DEFAULT_CLIENT_PORT};
     inline constexpr uint16_t DEFAULT_DNS_PORT{53};
     inline constexpr int CLIENT_ROUTER_CONNECTIONS{4};
