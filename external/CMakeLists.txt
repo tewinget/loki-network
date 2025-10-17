@@ -58,26 +58,25 @@ macro(system_or_submodule BIGNAME smallname target pkgconf subdir)
 endmacro()
 
 system_or_submodule(OXENC oxenc oxenc::oxenc liboxenc>=1.5.0 oxen-libquic/external/oxen-encoding)
-system_or_submodule(OXENLOGGING oxen-logging oxen::logging liboxen-logging>=1.2.0 oxen-libquic/external/oxen-logging)
-if(SROUTER_FULL)
-    system_or_submodule(OXENMQ oxenmq oxenmq::oxenmq liboxenmq>=1.3 oxen-mq)
-endif()
 
 # oxen-logging
 if (NOT TARGET oxen::logging)
     if(BUILD_STATIC_DEPS)
         set(OXEN_LOGGING_FORCE_SUBMODULES ON CACHE INTERNAL "")
     endif()
-    system_or_submodule(OXENLOGGING oxen-logging liboxen-logging>=1.2.0 oxen-logging)
+    system_or_submodule(OXENLOGGING oxen-logging oxen::logging liboxen-logging>=1.2.0 oxen-libquic/external/oxen-logging)
+    add_library(oxen-logging-fmt-spdlog INTERFACE)
+    target_link_libraries(oxen-logging-fmt-spdlog INTERFACE oxen::logging)
     if(OXENLOGGING_FOUND)
         # If we load oxen-logging via system lib then we won't necessarily have fmt/spdlog targets,
         # but this script will give us them:
         include(oxen-libquic/external/oxen-logging/cmake/load_fmt_spdlog.cmake)
-
-        add_library(oxen-logging-fmt-spdlog INTERFACE)
-        target_link_libraries(oxen-logging-fmt-spdlog INTERFACE oxen-logging ${OXEN_LOGGING_FMT_TARGET} ${OXEN_LOGGING_SPDLOG_TARGET})
-        add_library(oxen::logging ALIAS oxen-logging-fmt-spdlog)
+        target_link_libraries(oxen-logging-fmt-spdlog INTERFACE ${OXEN_LOGGING_FMT_TARGET} ${OXEN_LOGGING_SPDLOG_TARGET})
     endif()
+endif()
+
+if(SROUTER_FULL)
+    system_or_submodule(OXENMQ oxenmq oxenmq::oxenmq liboxenmq>=1.3 oxen-mq)
 endif()
 
 set(JSON_BuildTests OFF CACHE INTERNAL "")

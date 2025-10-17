@@ -268,7 +268,7 @@ add_subdirectory(external)
 # interface library for setting common includes, linkage and flags
 add_library(session-router-base INTERFACE)
 target_include_directories(session-router-base INTERFACE include)
-target_link_libraries(session-router-base INTERFACE oxen::quic fmt::fmt nlohmann_json::nlohmann_json)
+target_link_libraries(session-router-base INTERFACE oxen::quic oxen-logging-fmt-spdlog nlohmann_json::nlohmann_json)
 
 target_compile_features(session-router-base INTERFACE cxx_std_20)
 
