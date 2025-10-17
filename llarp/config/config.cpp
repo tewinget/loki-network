@@ -603,7 +603,7 @@ namespace llarp
             NotEmbedded,
             Comment{
                 "Interface name for Session Router traffic. If unset Session Router will look for a free name",
-                "matching 'lokitunN', starting at N=0 (e.g. lokitun0, lokitun1, ...).",
+                "matching 'sr-tunN', starting at N=0 (e.g. sr-tun0, sr-tun1, ...).",
 #ifdef __linux__
                 "",
                 "On Linux, you can use '%d' in the name as a pattern to have the OS automatically choose",

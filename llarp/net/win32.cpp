@@ -100,7 +100,7 @@ namespace llarp::net
             return quic::Address{};
         }
 
-        std::string find_free_tun() const override { return "lokitun0"; }
+        std::string find_free_tun() const override { return "sr-tun0"; }
 
         std::optional<quic::Address> get_best_public_address(bool, uint16_t) const override
         {

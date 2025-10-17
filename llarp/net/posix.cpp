@@ -176,7 +176,7 @@ namespace llarp::net
                     return std::string{suggest};
             }
             // Let the kernel choose automatically:
-            return "lokitun%d"s;
+            return "sr-tun%d"s;
 #else
             // On non-linux (e.g. FreeBSD) arbitrary tun device names can't be chosen, so we just
             // return "" to always auto-allocate.

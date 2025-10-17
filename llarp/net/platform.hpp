@@ -35,14 +35,14 @@ namespace llarp::net
         virtual std::optional<ipv6_net> find_free_ipv6_net(uint8_t /*mask*/ = 64) const { return std::nullopt; }
 
         // Attempts to find a usable tun device name.  This may return an empty string if naming
-        // cannot be controlled, or a pattern (e.g. "lokitun%d") depending on the OS.  Note in
+        // cannot be controlled, or a pattern (e.g. "sr-tun%d") depending on the OS.  Note in
         // particular that that means the value returned here is merely suitable for creating the
         // tun, but not necessarily the final name.
         //
         // If suggest is given then we try that first before falling back to a generic name.  (Note
         // that the suggestion will be truncated at the OS name limit, e.g. 15 characters on linux).
         //
-        // If possible (and no suggestion is given), we try to use lokitun0, lokitun1, etc.
+        // If possible (and no suggestion is given), we try to use sr-tun0, sr-tun1, etc.
         virtual std::string find_free_tun(std::string_view suggest = ""sv) const = 0;
 
         // Returns the IPv4 address of an interface, if it exists and has one, nullopt otherwise.
