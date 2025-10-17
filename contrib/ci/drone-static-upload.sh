@@ -61,9 +61,9 @@ elif [ -e build-mac ]; then
     mv build-mac/SessionRouter*/ "$base"
     tar cJvf "$archive" "$base"
 else
-    cp -av build/daemon/session_router{,-cntrl} "$base"
+    #cp -av build/session_router{,-cntrl} "$base"
+    cp -av build/session_router "$base"
     cp -av contrib/bootstrap/mainnet.signed "$base/bootstrap.signed"
-    # tar dat shiz up yo
     archive="$base.tar.xz"
     tar cJvf "$archive" "$base"
 fi
