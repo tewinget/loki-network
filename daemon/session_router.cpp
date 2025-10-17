@@ -3,7 +3,6 @@
 #include <llarp/constants/platform.hpp>
 #include <llarp/constants/version.hpp>
 #include <llarp/util/exceptions.hpp>
-#include <llarp/util/Session-Router_init.h>
 #include <llarp/util/thread/threading.hpp>
 
 #include <CLI/CLI.hpp>
@@ -51,9 +50,9 @@ namespace
     void uninstall_win32_daemon();
 
     // operational function definitions
-    int Session-Router_main(int, char**);
+    int srouter_main(int, char**);
     void handle_signal(int sig);
-    static void start_Session-Router(std::optional<std::filesystem::path> confFile, bool snode);
+    void start_srouter(std::optional<std::filesystem::path> confFile, bool snode);
 
     // variable declarations
     static auto logcat = llarp::log::Cat("daemon");
@@ -93,7 +92,7 @@ namespace
             perror("Failed to start Windows Sockets");
             return err;
         }
-        ::CreateMutex(nullptr, FALSE, "Session-Router_win32_daemon");
+        ::CreateMutex(nullptr, FALSE, "srouter_win32_daemon");
         return 0;
     }
 
@@ -308,18 +307,18 @@ namespace
             return;
         }
 
-        // we hard code the args to Session-Router_main.
+        // we hard code the args to srouter_main.
         // we yoink argv[0] (Session-Router.exe path) and pass in the new args.
         std::array args = {
             reinterpret_cast<char*>(argv[0]),
-            reinterpret_cast<char*>(strdup("c:\\programdata\\Session-Router\\Session-Router.ini")),
+            reinterpret_cast<char*>(strdup("c:\\programdata\\Session-Router\\session-router.ini")),
             reinterpret_cast<char*>(0)};
-        Session-Router_main(args.size() - 1, args.data());
+        srouter_main(args.size() - 1, args.data());
     }
 
 #endif
 
-    int Session-Router_main(int argc, char** argv)
+    int srouter_main(int argc, char** argv)
     {
 #ifdef _WIN32
         if (startWinsock())
@@ -329,13 +328,13 @@ namespace
 
         CLI::App cli{
             "Session Router is a free, open source, private, decentralized, market-based sybil resistant "
-            "and IP based onion routing network Session-Router"};
+            "and IP-based onion routing network"};
         command_line_options options{};
 
         // flags: boolean values in command_line_options struct
         cli.add_flag("--version", options.version, "Session Router version");
         cli.add_flag("-g,--generate", options.generate, "Generate default configuration and exit");
-        cli.add_flag("-r,--router", options.router, "Run Session-Router in routing mode instead of client-only mode");
+        cli.add_flag("-r,--router", options.router, "Run Session Router as a router (service node) instead of as a client");
         cli.add_flag(
             "-e,--generate-embedded",
             options.generate_embedded,
@@ -343,7 +342,7 @@ namespace
         cli.add_flag("-f,--force", options.overwrite, "Force writing config even if file exists");
 
         // options: string
-        cli.add_option("config,--config", options.configPath, "Path to Session-Router.ini configuration file")
+        cli.add_option("config,--config", options.configPath, "Path to session-router.ini configuration file")
             ->capture_default_str();
 
         if constexpr (llarp::platform::is_windows)
@@ -460,7 +459,7 @@ namespace
 
         try
         {
-            start_Session-Router(configFile, options.router);
+            start_srouter(configFile, options.router);
         }
         catch (const std::exception& e)
         {
@@ -473,7 +472,7 @@ namespace
             llarp::util::SetThreadName("llarp-watchdog");
             while (ftr.wait_for(1s) != std::future_status::ready)
             {
-                // do periodic non Session-Router related tasks here
+                // do periodic non Session Router related tasks here
                 if (ctx and ctx->is_up() and not ctx->looks_alive())
                 {
                     auto deadlock_cat = llarp::log::Cat("deadlock");
@@ -496,7 +495,7 @@ namespace
     }
 
     // this sets up, configures and runs the main context
-    static void start_Session-Router(std::optional<std::filesystem::path> confFile, bool snode)
+    void start_srouter(std::optional<std::filesystem::path> confFile, bool snode)
     {
         llarp::log::info(logcat, "starting up {}", llarp::SROUTER_VERSION_FULL);
         try
@@ -524,7 +523,7 @@ namespace
         }
         catch (llarp::util::bind_socket_error& ex)
         {
-            auto msg = "{}; is Session-Router already running?"_format(ex.what());
+            auto msg = "{}; is Session Router already running?"_format(ex.what());
             llarp::log::error(logcat, "{}", msg);
             throw std::runtime_error{msg};
         }
@@ -550,13 +549,13 @@ int main(int argc, char* argv[])
     // oxen::log::add_sink(llarp::logRingBuffer, llarp::log::DEFAULT_PATTERN_MONO);
 
 #ifndef _WIN32
-    return Session-Router_main(argc, argv);
+    return srouter_main(argc, argv);
 #else
     if (auto hntdll = GetModuleHandle("ntdll.dll"))
     {
         if (GetProcAddress(hntdll, "wine_get_version"))
         {
-            static const char* text = "Don't run Session-Router in wine, aborting startup";
+            static const char* text = "Don't run Session Router in wine, aborting startup";
             static const char* title = "Session Router Wine Error";
             MessageBoxA(NULL, text, title, MB_ICONHAND);
             std::abort();
@@ -577,7 +576,7 @@ int main(int argc, char* argv[])
     if (error == ERROR_FAILED_SERVICE_CONTROLLER_CONNECT)
     {
         llarp::sys::service_manager->disable();
-        return Session-Router_main(argc, argv);
+        return srouter_main(argc, argv);
     }
     else
     {
