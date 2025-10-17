@@ -1211,16 +1211,16 @@ namespace llarp
         // TODO: add pubkey to whitelist
     }
 
-    void LokidConfig::define_config_options(ConfigDefinition& conf, const ConfigGenParameters&)
+    void OxendConfig::define_config_options(ConfigDefinition& conf, const ConfigGenParameters&)
     {
         conf.add_section_comments(
-            "lokid",
+            "oxend",
             {
-                "Settings for communicating with oxend",
+                "Settings for communicating with oxend (when running as a Service Node relay)",
             });
 
         conf.define_option<bool>(
-            "lokid",
+            "oxend",
             "disable-testing",
             Default{false},
             Hidden,
@@ -1229,7 +1229,7 @@ namespace llarp
             assignment_acceptor(disable_testing));
 
         conf.define_option<std::string>(
-            "lokid",
+            "oxend",
             "rpc",
             RelayOnly,
             Required,
@@ -1248,20 +1248,6 @@ namespace llarp
 #endif
                 rpc_addr = std::move(arg);
             });
-
-        // Deprecated options:
-        conf.define_option<std::string>("lokid", "jsonrpc", RelayOnly, Hidden, [](std::string arg) {
-            if (arg.empty())
-                return;
-            throw std::invalid_argument(
-                "the [lokid]:jsonrpc option is no longer supported; please use the [lokid]:rpc config "
-                "option instead with oxend's lmq-local-control address -- typically a value such as "
-                "rpc=ipc:///var/lib/oxen/oxend.sock or rpc=ipc:///home/snode/.oxen/oxend.sock");
-        });
-        conf.define_option<bool>("lokid", "enabled", RelayOnly, Deprecated);
-        conf.define_option<std::string>("lokid", "username", Deprecated);
-        conf.define_option<std::string>("lokid", "password", Deprecated);
-        conf.define_option<std::string>("lokid", "service-node-seed", Deprecated);
     }
 
     void BootstrapConfig::define_config_options(ConfigDefinition& conf, const ConfigGenParameters&)
@@ -1768,7 +1754,7 @@ namespace llarp
         dns.define_config_options(conf, params);
         links.define_config_options(conf, params);
         api.define_config_options(conf, params);
-        lokid.define_config_options(conf, params);
+        oxend.define_config_options(conf, params);
         bootstrap.define_config_options(conf, params);
         logging.define_config_options(conf, params);
     }

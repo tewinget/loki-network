@@ -264,9 +264,8 @@ namespace llarp
         void define_config_options(ConfigDefinition& conf, const ConfigGenParameters& params);
     };
 
-    struct LokidConfig
+    struct OxendConfig
     {
-        std::filesystem::path id_keyfile;
         std::string rpc_addr;
         bool disable_testing = false;
 
@@ -329,7 +328,7 @@ namespace llarp
         DnsConfig dns;
         LinksConfig links;
         ApiConfig api;
-        LokidConfig lokid;
+        OxendConfig oxend;
         BootstrapConfig bootstrap;
         LoggingConfig logging;
 
