@@ -96,4 +96,4 @@ else:
     sys.exit(1)
 
 # sample usage:
-# ./omq-rpc.py ipc://$HOME/.oxen/testnet/oxend.sock 'llarp.get_service_nodes' | jq
+# ./omq-rpc.py ipc://$HOME/.oxen/testnet/oxend.sock 'rpc.get_service_nodes' | jq

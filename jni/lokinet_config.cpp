@@ -1,12 +1,13 @@
-#include "sessionrouter_jni_common.hpp"
 #include "network_loki_sessionrouter_SessionRouterConfig.h"
+#include "sessionrouter_jni_common.hpp"
 
 #include <llarp.hpp>
 #include <llarp/config/config.hpp>
 
 extern "C"
 {
-    JNIEXPORT jobject JNICALL Java_network_loki_sessionrouter_SessionRouterConfig_Obtain(JNIEnv* env, jclass, jstring dataDir)
+    JNIEXPORT jobject JNICALL
+    Java_network_loki_sessionrouter_SessionRouterConfig_Obtain(JNIEnv* env, jclass, jstring dataDir)
     {
         auto conf = VisitStringAsStringView<llarp::Config*>(
             env, dataDir, [](std::string_view val) -> llarp::Config* { return new llarp::Config{val}; });

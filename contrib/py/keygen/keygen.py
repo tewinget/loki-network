@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-keygen tool for session_router
+keygen tool for Session Router
 """
 
 from argparse import ArgumentParser as AP
@@ -25,10 +25,9 @@ def main():
     args = argparser.parse_args()
     secret = SigningKey.generate()
     with open(args.keyfile, 'wb') as wfile:
-        wfile.write(b'd1:s64:')
-        wfile.write(secret.encode())
-        wfile.write(secret.verify_key.encode())
-        wfile.write(b'e')
+        wfile.write(secret.encode().hex())
+        wfile.write(secret.verify_key.encode().hex())
+        wfile.write(b'\n')
     print("{}.loki".format(base32z(secret.verify_key.encode())))
 
 if __name__ == '__main__':

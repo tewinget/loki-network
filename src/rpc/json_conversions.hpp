@@ -1,0 +1,35 @@
+#pragma once
+
+#include "address/ip_range.hpp"
+#include "json_binary_proxy.hpp"
+#include "util/logging.hpp"
+
+#include <nlohmann/json_fwd.hpp>
+
+namespace srouter
+{
+    void to_json(nlohmann::json& j, const ipv4_net& ipr);
+    void from_json(const nlohmann::json& j, ipv4_net& ipr);
+}  // namespace srouter
+
+namespace nlohmann
+{
+    // Specializations of binary types for deserialization; when receiving these from json we expect
+    // them encoded in hex or base64.  These may *not* be used for serialization, and will throw if
+    // so invoked; for serialization you need to use RPC_COMMAND::response_hex (or _b64) instead.
+    template <typename T>
+    struct adl_serializer<T, std::enable_if_t<srouter::rpc::json_is_binary<T>>>
+    {
+        static_assert(std::is_trivially_copyable_v<T> && std::has_unique_object_representations_v<T>);
+
+        static void to_json(json&, const T&)
+        {
+            throw std::logic_error{"Internal error: binary types are not directly serializable"};
+        }
+        static void from_json(const json& j, T& val)
+        {
+            srouter::rpc::load_binary_parameter(j.get<std::string_view>(), false /*no raw*/, val);
+        }
+    };
+
+}  // namespace nlohmann

@@ -1,0 +1,27 @@
+#pragma once
+
+#include "contact/relay_contact.hpp"
+#include "contact/router_id.hpp"
+#include "util/logging/buffer.hpp"
+
+namespace srouter
+{
+    namespace FetchRC
+    {
+        extern const std::string INVALID_REQUEST;
+
+        std::vector<std::byte> serialize(std::span<const RouterID> explicit_ids);
+
+        std::vector<RelayContact> deserialize_response(NetID netid, oxenc::bt_dict_consumer&& btdc);
+
+    }  // namespace FetchRC
+
+    namespace FetchRID
+    {
+        inline constexpr auto INVALID_REQUEST = "Invalid relay ID requested to relay response from."sv;
+
+        std::vector<std::byte> serialize(const RouterID& source);
+
+    }  // namespace FetchRID
+
+}  // namespace srouter

@@ -267,7 +267,7 @@ add_subdirectory(external)
 
 # interface library for setting common includes, linkage and flags
 add_library(session-router-base INTERFACE)
-target_include_directories(session-router-base INTERFACE . include)
+target_include_directories(session-router-base INTERFACE include)
 target_link_libraries(session-router-base INTERFACE oxen::quic fmt::fmt nlohmann_json::nlohmann_json)
 
 target_compile_features(session-router-base INTERFACE cxx_std_20)
@@ -314,10 +314,10 @@ if(SROUTER_HIVE)
   add_definitions(-DSROUTER_HIVE)
 endif()
 
-add_subdirectory(llarp)
+add_subdirectory(src)
 
 if(SROUTER_DAEMON)
-  add_subdirectory(daemon)
+  add_subdirectory(src/daemon)
 endif()
 
 if(SROUTER_HIVE)

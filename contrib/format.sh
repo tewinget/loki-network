@@ -7,9 +7,9 @@ set -e
 
 cd "$(dirname $0)/../"
 
-sources=($(find jni daemon llarp include pybind | grep -E '\.([hc](pp)?|m(m)?)$' | grep -v '#'))
+sources=($(find jni src include pybind | grep -E '\.([hc](pp)?|m(m)?)$' | grep -v '#'))
 
-incl_pat='^(#include +)"(llarp|libntrup|oxen|oxenc|oxenmq|quic|CLI|cpr|nlohmann|ghc|fmt|spdlog|uvw?)([/.][^"]*)"'
+incl_pat='^(#include +)"(libntrup|oxen|oxenc|oxenmq|quic|CLI|cpr|nlohmann|ghc|fmt|spdlog|uvw?)([/.][^"]*)"'
 
 if [ "$1" = "verify" ] ; then
     if [ $($CLANG_FORMAT --output-replacements-xml "${sources[@]}" | grep '</replacement>' | wc -l) -ne 0 ] ; then
@@ -34,13 +34,13 @@ fi
 swift_format=$(command -v swiftformat 2>/dev/null)
 if [ $? -eq 0 ]; then
     if [ "$1" = "verify" ] ; then
-        for f in $(find daemon | grep -E '\.swift$' | grep -v '#') ; do
+        for f in $(find src/daemon | grep -E '\.swift$' | grep -v '#') ; do
             if [ $($swift_format --quiet --dryrun < "$f" | diff "$f" - | wc -l) -ne 0 ] ; then
                 exit 3
             fi
         done
     else
-        $swift_format --quiet $(find daemon | grep -E '\.swift$' | grep -v '#')
+        $swift_format --quiet $(find src/daemon | grep -E '\.swift$' | grep -v '#')
     fi
 
 fi

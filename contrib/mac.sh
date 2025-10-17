@@ -10,8 +10,8 @@
 set -e
 set -x
 
-if ! [ -f LICENSE ] || ! [ -d llarp ]; then
-    echo "You need to run this as ./contrib/mac.sh from the top-level Session Router project directory" >&2
+if ! [ -f LICENSE ] || ! [ -d src ] || ! [ -d include/session/router.hpp ]; then
+    echo "You need to run this as ./contrib/mac.sh from the top-level session-router project directory" >&2
     exit 1
 fi
 

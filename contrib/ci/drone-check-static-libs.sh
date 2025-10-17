@@ -10,8 +10,8 @@ build=${1:-build}
 
 bad=
 if [ "$DRONE_STAGE_OS" == "darwin" ]; then
-    if otool -L ${build}/llarp/apple/org.session.network-extension.systemextension/Contents/MacOS/org.session.network-extension | \
-        grep -Ev '^llarp/apple:|^\t(/usr/lib/lib(System\.|c\+\+|objc))|/System/Library/Frameworks/(CoreFoundation|NetworkExtension|Foundation|Network)\.framework'; then
+    if otool -L ${build}/src/apple/org.session.network-extension.systemextension/Contents/MacOS/org.session.network-extension | \
+        grep -Ev '^src/apple:|^\t(/usr/lib/lib(System\.|c\+\+|objc))|/System/Library/Frameworks/(CoreFoundation|NetworkExtension|Foundation|Network)\.framework'; then
         bad=1
     fi
 elif [ "$DRONE_STAGE_OS" == "linux" ]; then

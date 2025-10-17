@@ -1,0 +1,11 @@
+#include "nodedb.hpp"
+
+namespace srouter
+{
+    const std::vector<std::pair<NetID, std::string_view>> NodeDB::bootstrap_fallbacks
+    {
+        // clang-format off
+@BOOTSTRAP_FALLBACKS@
+        // clang-format on
+    };
+}  // namespace srouter

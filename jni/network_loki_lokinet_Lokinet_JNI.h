@@ -20,7 +20,8 @@ extern "C"
      * Method:    startSessionRouter
      * Signature: (Ljava/lang/String;)Ljava/lang/String;
      */
-    JNIEXPORT jstring JNICALL Java_network_loki_sessionrouter_SessionRouter_1JNI_startSessionRouter(JNIEnv*, jclass, jstring);
+    JNIEXPORT jstring JNICALL
+    Java_network_loki_sessionrouter_SessionRouter_1JNI_startSessionRouter(JNIEnv*, jclass, jstring);
 
     JNIEXPORT jstring JNICALL Java_network_loki_sessionrouter_SessionRouter_1JNI_getIfAddr(JNIEnv*, jclass);
 
@@ -33,14 +34,16 @@ extern "C"
      */
     JNIEXPORT void JNICALL Java_network_loki_sessionrouter_SessionRouter_1JNI_stopSessionRouter(JNIEnv*, jclass);
 
-    JNIEXPORT void JNICALL Java_network_loki_sessionrouter_SessionRouter_1JNI_setVPNFileDescriptor(JNIEnv*, jclass, jint, jint);
+    JNIEXPORT void JNICALL
+    Java_network_loki_sessionrouter_SessionRouter_1JNI_setVPNFileDescriptor(JNIEnv*, jclass, jint, jint);
 
     /*
      * Class:     network_loki_sessionrouter_SessionRouter_JNI
      * Method:    onNetworkStateChanged
      * Signature: (Z)V
      */
-    JNIEXPORT void JNICALL Java_network_loki_sessionrouter_SessionRouter_1JNI_onNetworkStateChanged(JNIEnv*, jclass, jboolean);
+    JNIEXPORT void JNICALL
+    Java_network_loki_sessionrouter_SessionRouter_1JNI_onNetworkStateChanged(JNIEnv*, jclass, jboolean);
 
 #ifdef __cplusplus
 }

@@ -1,5 +1,5 @@
-#include "sessionrouter_jni_common.hpp"
 #include "network_loki_sessionrouter_SessionRouterDaemon.h"
+#include "sessionrouter_jni_common.hpp"
 
 #include <llarp.hpp>
 #include <llarp/config/config.hpp>

@@ -1,0 +1,119 @@
+#pragma once
+
+#include <oxenc/common.h>
+
+#include <algorithm>
+#include <cassert>
+#include <cstdint>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <iterator>
+#include <string>
+#include <type_traits>
+#include <utility>
+#include <vector>
+
+/// TODO: replace usage of these with std::span (via a backport until we move to C++20).  That's a
+/// fairly big job, though, as buffer_t is currently used a bit differently (i.e. maintains
+/// both start and current position, plus has some value reading/writing methods).
+struct /* [[deprecated("this type is stupid, use something else")]] */ buffer_t
+{
+    /// starting memory address
+    uint8_t* base{nullptr};
+    /// memory address of stream position
+    uint8_t* cur{nullptr};
+    /// max size of buffer
+    size_t sz{0};
+
+    uint8_t operator[](size_t x) { return *(this->base + x); }
+
+    buffer_t() = default;
+
+    buffer_t(uint8_t* b, uint8_t* c, size_t s) : base(b), cur(c), sz(s) {}
+
+    template <typename Byte>
+    static constexpr bool is_basic_byte = sizeof(Byte) == 1 and std::is_trivially_copyable_v<Byte>;
+
+    /// Construct referencing some 1-byte, trivially copyable (e.g. char, unsigned char, uint8_t)
+    /// pointer type and a buffer size.
+    template <typename Byte, typename = std::enable_if_t<not std::is_const_v<Byte> && is_basic_byte<Byte>>>
+    buffer_t(Byte* buf, size_t sz) : base{reinterpret_cast<uint8_t*>(buf)}, cur{base}, sz{sz}
+    {}
+
+    /// initialize buffer_t from vector or array of byte-like values
+    template <typename Byte, typename = std::enable_if_t<not std::is_const_v<Byte> && is_basic_byte<Byte>>>
+    buffer_t(std::vector<Byte>& b) : buffer_t{b.data(), b.size()}
+    {}
+
+    template <typename Byte, size_t N, typename = std::enable_if_t<not std::is_const_v<Byte> && is_basic_byte<Byte>>>
+    buffer_t(std::array<Byte, N>& b) : buffer_t{b.data(), b.size()}
+    {}
+
+    // These overloads, const_casting away the const, are not just gross but downright dangerous:
+    template <typename Byte, typename = std::enable_if_t<is_basic_byte<Byte>>>
+    buffer_t(const Byte* buf, size_t sz) : buffer_t{const_cast<Byte*>(buf), sz}
+    {}
+
+    template <typename Byte, typename = std::enable_if_t<is_basic_byte<Byte>>>
+    buffer_t(const std::vector<Byte>& b) : buffer_t{const_cast<Byte*>(b.data()), b.size()}
+    {}
+
+    template <typename Byte, size_t N, typename = std::enable_if_t<is_basic_byte<Byte>>>
+    buffer_t(const std::array<Byte, N>& b) : buffer_t{const_cast<Byte*>(b.data()), b.size()}
+    {}
+
+    /// Explicitly construct a buffer_t from anything with a `.data()` and a `.size()`.
+    /// Cursed.
+    template <typename T, typename = std::void_t<decltype(std::declval<T>().data() + std::declval<T>().size())>>
+    explicit buffer_t(T&& t) : buffer_t{t.data(), t.size()}
+    {}
+
+    std::string to_string() const { return {reinterpret_cast<const char*>(base), sz}; }
+
+    uint8_t* begin() { return base; }
+    const uint8_t* begin() const { return base; }
+    uint8_t* end() { return base + sz; }
+    const uint8_t* end() const { return base + sz; }
+
+    size_t size_left() const
+    {
+        size_t diff = cur - base;
+        assert(diff <= sz);
+        if (diff > sz)
+            return 0;
+        return sz - diff;
+    }
+
+    template <typename InputIt>
+    bool write(InputIt begin, InputIt end);
+
+    bool put_uint16(uint16_t i);
+    bool put_uint32(uint32_t i);
+
+    bool put_uint64(uint64_t i);
+
+    bool read_uint16(uint16_t& i);
+    bool read_uint32(uint32_t& i);
+
+    bool read_uint64(uint64_t& i);
+
+    /// make a copy of this buffer
+    std::vector<uint8_t> copy() const;
+
+  private:
+    buffer_t(const buffer_t&) = default;
+    buffer_t(buffer_t&&) = default;
+};
+
+template <typename InputIt>
+bool buffer_t::write(InputIt begin, InputIt end)
+{
+    auto dist = std::distance(begin, end);
+    if (static_cast<decltype(dist)>(size_left()) >= dist)
+    {
+        cur = std::copy(begin, end, cur);
+        return true;
+    }
+    return false;
+}

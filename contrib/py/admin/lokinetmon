@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+import sys
+print("FIXME: lokinetmon is not yet usable with session router!")
+sys.exit(1)
+
 import curses
 import json
 import sys
