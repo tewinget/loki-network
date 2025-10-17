@@ -399,19 +399,18 @@ local docs_pipeline(name, image, extra_cmds=[], allow_fail=false) = {
   clang(19),
   full_llvm(19),
 
-  // Debian 14
-  debian_pipeline('Debian 14', docker_base + 'debian-forky'),
-  debian_pipeline('Debian 14 [i386]', docker_base + 'debian-forky/i386'),
-  debian_pipeline('Debian 14 [arm64]', docker_base + 'debian-forky', arch='arm64', jobs=4),
-  debian_pipeline('Debian 14 [armhf]', docker_base + 'debian-forky/arm32v7', arch='arm64', jobs=4),
+  debian_pipeline('Debian testing', docker_base + 'debian-forky'),
+  debian_pipeline('Debian testing [i386]', docker_base + 'debian-forky/i386'),
+  debian_pipeline('Debian testing [arm64]', docker_base + 'debian-forky', arch='arm64', jobs=4),
+  debian_pipeline('Debian testing [armhf]', docker_base + 'debian-forky/arm32v7', arch='arm64', jobs=4),
 
   // Debian 13
-  debian_pipeline('Debian 13', docker_base + 'debian-trixie'),
-  debian_pipeline('Debian 13 [arm64]', docker_base + 'debian-trixie', arch='arm64', jobs=4),
+  debian_pipeline('Debian 13/trixie', docker_base + 'debian-trixie'),
+  debian_pipeline('Debian 13/trixie [arm64]', docker_base + 'debian-trixie', arch='arm64', jobs=4),
 
   // Debian 12
-  debian_pipeline('Debian 12', docker_base + 'debian-bookworm'),
-  debian_pipeline('Debian 12 static/debug',
+  debian_pipeline('Debian 12/bookworm', docker_base + 'debian-bookworm'),
+  debian_pipeline('Debian 12/bookworm static/debug',
                   docker_base + 'debian-bookworm',
                   build_type='Debug',
                   deps=static_deps,
@@ -419,7 +418,7 @@ local docs_pipeline(name, image, extra_cmds=[], allow_fail=false) = {
                   cmake_extra='-DBUILD_STATIC_DEPS=ON -DBUILD_SHARED_LIBS=OFF -DSTATIC_LINK=ON'),
 
   // Static debian 12 armhf (upload to builds.lokinet.dev)
-  debian_pipeline('Debian 12 static [armhf]',
+  debian_pipeline('Debian 12/bookworm static [armhf]',
                   docker_base + 'debian-bookworm/arm32v7',
                   arch='arm64',
                   deps=static_deps,
