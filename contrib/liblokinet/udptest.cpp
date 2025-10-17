@@ -1,4 +1,4 @@
-#include <lokinet.h>
+#include <session_router.h>
 
 #include <signal.h>
 
@@ -14,23 +14,23 @@
 
 bool _run{true};
 
-using Lokinet_ptr = std::shared_ptr<lokinet_context>;
+using Session_Router_ptr = std::shared_ptr<session_router_context>;
 
 [[nodiscard]] auto
 MakeLokinet(const std::vector<char>& bootstrap)
 {
-  auto ctx = std::shared_ptr<lokinet_context>(lokinet_context_new(), lokinet_context_free);
-  if (auto err = lokinet_add_bootstrap_rc(bootstrap.data(), bootstrap.size(), ctx.get()))
+  auto ctx = std::shared_ptr<session_router_context>(session_router_context_new(), session_router_context_free);
+  if (auto err = session_router_add_bootstrap_rc(bootstrap.data(), bootstrap.size(), ctx.get()))
     throw std::runtime_error{strerror(err)};
-  if (lokinet_context_start(ctx.get()))
+  if (session_router_context_start(ctx.get()))
     throw std::runtime_error{"could not start context"};
   return ctx;
 }
 
 void
-WaitForReady(const Lokinet_ptr& ctx)
+WaitForReady(const Session_Router_ptr& ctx)
 {
-  while (_run and lokinet_wait_for_ready(1000, ctx.get()))
+  while (_run and session_router_wait_for_ready(1000, ctx.get()))
   {
     std::cout << "waiting for context..." << std::endl;
   }
@@ -38,14 +38,14 @@ WaitForReady(const Lokinet_ptr& ctx)
 
 class Flow
 {
-  lokinet_udp_flowinfo const _info;
-  lokinet_context* const _ctx;
+  session_router_udp_flowinfo const _info;
+  session_router_context* const _ctx;
 
  public:
-  explicit Flow(const lokinet_udp_flowinfo* info, lokinet_context* ctx) : _info{*info}, _ctx{ctx}
+  explicit Flow(const session_router_udp_flowinfo* info, session_router_context* ctx) : _info{*info}, _ctx{ctx}
   {}
 
-  lokinet_context*
+  session_router_context*
   Context() const
   {
     return _ctx;
@@ -63,8 +63,8 @@ class Flow
 
 struct ConnectJob
 {
-  lokinet_udp_flowinfo remote;
-  lokinet_context* ctx;
+  session_router_udp_flowinfo remote;
+  session_router_context* ctx;
 };
 
 void
@@ -79,9 +79,9 @@ CreateOutboundFlow(void* user, void** flowdata, int* timeout)
 }
 
 int
-ProcessNewInboundFlow(void* user, const lokinet_udp_flowinfo* remote, void** flowdata, int* timeout)
+ProcessNewInboundFlow(void* user, const session_router_udp_flowinfo* remote, void** flowdata, int* timeout)
 {
-  auto* ctx = static_cast<lokinet_context*>(user);
+  auto* ctx = static_cast<session_router_context*>(user);
   Flow* flow = new Flow{remote, ctx};
   std::cout << "new udp flow: " << flow->String() << std::endl;
   *flowdata = flow;
@@ -91,7 +91,7 @@ ProcessNewInboundFlow(void* user, const lokinet_udp_flowinfo* remote, void** flo
 }
 
 void
-DeleteFlow(const lokinet_udp_flowinfo* remote, void* flowdata)
+DeleteFlow(const session_router_udp_flowinfo* remote, void* flowdata)
 {
   auto* flow = static_cast<Flow*>(flowdata);
   std::cout << "udp flow from " << flow->String() << " timed out" << std::endl;
@@ -99,24 +99,24 @@ DeleteFlow(const lokinet_udp_flowinfo* remote, void* flowdata)
 }
 
 void
-HandleUDPPacket(const lokinet_udp_flowinfo* remote, const char* pkt, size_t len, void* flowdata)
+HandleUDPPacket(const session_router_udp_flowinfo* remote, const char* pkt, size_t len, void* flowdata)
 {
   auto* flow = static_cast<Flow*>(flowdata);
   std::cout << "we got " << len << " bytes of udp from " << flow->String() << std::endl;
 }
 
 void
-BounceUDPPacket(const lokinet_udp_flowinfo* remote, const char* pkt, size_t len, void* flowdata)
+BounceUDPPacket(const session_router_udp_flowinfo* remote, const char* pkt, size_t len, void* flowdata)
 {
   auto* flow = static_cast<Flow*>(flowdata);
   std::cout << "bounce " << len << " bytes of udp from " << flow->String() << std::endl;
-  if (auto err = lokinet_udp_flow_send(remote, pkt, len, flow->Context()))
+  if (auto err = session_router_udp_flow_send(remote, pkt, len, flow->Context()))
   {
     std::cout << "bounce failed: " << strerror(err) << std::endl;
   }
 }
 
-Lokinet_ptr sender, recip;
+Session_Router_ptr sender, recip;
 
 void
 signal_handler(int)
@@ -149,21 +149,21 @@ main(int argc, char* argv[])
     inf.read(bootstrap.data(), bootstrap.size());
   }
 
-  if (auto* loglevel = getenv("LOKINET_LOG"))
-    lokinet_log_level(loglevel);
+  if (auto* loglevel = getenv("SROUTER_LOG"))
+    session_router_log_level(loglevel);
   else
-    lokinet_log_level("none");
+    session_router_log_level("none");
 
   std::cout << "starting up" << std::endl;
 
   recip = MakeLokinet(bootstrap);
   WaitForReady(recip);
 
-  lokinet_udp_bind_result recipBindResult{};
+  session_router_udp_bind_result recipBindResult{};
 
   const auto port = 10000;
 
-  if (auto err = lokinet_udp_bind(
+  if (auto err = session_router_udp_bind(
           port,
           ProcessNewInboundFlow,
           BounceUDPPacket,
@@ -181,13 +181,13 @@ main(int argc, char* argv[])
   sender = MakeLokinet(bootstrap);
   WaitForReady(sender);
 
-  std::string recipaddr{lokinet_address(recip.get())};
+  std::string recipaddr{session_router_address(recip.get())};
 
   std::cout << "recip ready at " << recipaddr << std::endl;
 
-  lokinet_udp_bind_result senderBindResult{};
+  session_router_udp_bind_result senderBindResult{};
 
-  if (auto err = lokinet_udp_bind(
+  if (auto err = session_router_udp_bind(
           port,
           ProcessNewInboundFlow,
           HandleUDPPacket,
@@ -212,7 +212,7 @@ main(int argc, char* argv[])
   {
     std::cout << "try establish to " << connect.remote.remote_host << std::endl;
     if (auto err =
-            lokinet_udp_establish(CreateOutboundFlow, &connect, &connect.remote, sender.get()))
+            session_router_udp_establish(CreateOutboundFlow, &connect, &connect.remote, sender.get()))
     {
       std::cout << "failed to establish to recip: " << strerror(err) << std::endl;
       usleep(100000);
@@ -222,14 +222,14 @@ main(int argc, char* argv[])
   } while (true);
   std::cout << "sender established" << std::endl;
 
-  const std::string buf{"liblokinet"};
+  const std::string buf{"libsessionrouter"};
 
-  const std::string senderAddr{lokinet_address(sender.get())};
+  const std::string senderAddr{session_router_address(sender.get())};
 
   do
   {
     std::cout << senderAddr << " send to remote: " << buf << std::endl;
-    if (auto err = lokinet_udp_flow_send(&connect.remote, buf.data(), buf.size(), sender.get()))
+    if (auto err = session_router_udp_flow_send(&connect.remote, buf.data(), buf.size(), sender.get()))
     {
       std::cout << "send failed: " << strerror(err) << std::endl;
     }

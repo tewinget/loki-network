@@ -5,7 +5,7 @@
 #
 # "i use this to prevent foot cannons caused by commiting broken code"
 #
-# ~ jeff (lokinet author and crazy person)
+# ~ jeff (Session Router author and crazy person)
 #
 #
 # to use this as a git hook do this in the root of the repo:
@@ -25,7 +25,7 @@ echo "remove old test build directory..."
 rm -rf build-git-hook
 mkdir build-git-hook
 echo "configuring test build jizz..."
-cmake -S . -B build-git-hook -DWITH_LTO=OFF -DLOKINET_HIVE=ON -G Ninja
+cmake -S . -B build-git-hook -DWITH_LTO=OFF -DSROUTER_HIVE=ON -G Ninja
 echo "ensure this shit compiles..."
 ninja -C build-git-hook all
 echo "ensure unit tests aren't fucked..."

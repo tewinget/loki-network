@@ -31,12 +31,12 @@ if [ -z "$os" ]; then
 fi
 
 if [ -n "$DRONE_TAG" ]; then
-    # For a tag build use something like `lokinet-linux-amd64-v1.2.3`
-    base="lokinet-$os-$DRONE_TAG"
+    # For a tag build use something like `session-router-linux-amd64-v1.2.3`
+    base="session-router-$os-$DRONE_TAG"
 else
     # Otherwise build a length name from the datetime and commit hash, such as:
-    # lokinet-linux-amd64-20200522T212342Z-04d7dcc54
-    base="lokinet-$os-$(date --date=@$DRONE_BUILD_CREATED +%Y%m%dT%H%M%SZ)-${DRONE_COMMIT:0:9}"
+    # session-router-linux-amd64-20200522T212342Z-04d7dcc54
+    base="session-router-$os-$(date --date=@$DRONE_BUILD_CREATED +%Y%m%dT%H%M%SZ)-${DRONE_COMMIT:0:9}"
 fi
 
 mkdir -v "$base"
@@ -48,10 +48,10 @@ if [ -e build/win32 ]; then
     # zipit up yo
     archive="$base.zip"
     zip -r "$archive" "$base"
-elif [ -e lokinet.apk ] ; then
+elif [ -e session_router.apk ] ; then
     # android af ngl
     archive="$base.apk"
-    cp -av lokinet.apk "$archive"
+    cp -av session_router.apk "$archive"
 elif [ -e build-docs ]; then
     archive="$base.tar.xz"
     cp -av build-docs/docs/mkdocs.yml build-docs/docs/markdown "$base"

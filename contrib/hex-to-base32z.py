@@ -5,8 +5,8 @@ import sys
 base32z_dict = 'ybndrfg8ejkmcpqxot1uwisza345h769'
 base32z_map = {base32z_dict[i]: i for i in range(len(base32z_dict))}
 
-def lokinet_snode_addr(pk_hex):
-    """Returns the lokinet snode address from a hex ed25519 pubkey"""
+def session_router_snode_addr(pk_hex):
+    """Returns the Session Router snode address from a hex ed25519 pubkey"""
     assert(len(pk_hex) == 64)
     bits = 0
     val = 0
@@ -32,7 +32,7 @@ def hex_from_snode(b32z):
         val = (val << 5) | base32z_map[x]  # Arbitrary precision integers FTW
 
     # `val` is now a 260 bit value (52 * 5 bits per char); but we only use the first bit of the last
-    # value (which is why lokinet addresses always end with y or o)
+    # value (which is why Session Router addresses always end with y or o)
     assert(b32z[-1] in 'yo')
     val >>= 4
 
@@ -58,4 +58,4 @@ if reverse:
         print("{}.snode -> {}".format(key[0:52], hex_from_snode(key[0:52])))
 else:
     for key in sys.argv[1:]:
-        print("{} -> {}".format(key, lokinet_snode_addr(key)))
+        print("{} -> {}".format(key, session_router_snode_addr(key)))

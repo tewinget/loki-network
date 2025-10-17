@@ -3,7 +3,7 @@
 # Build the shit on mac
 #
 # You will generally need to add: -DCODESIGN_APP=... to make this work, and (unless you are a
-# lokinet team member) will need to pay Apple money for your own team ID and arse around with
+# Session Router team member) will need to pay Apple money for your own team ID and arse around with
 # provisioning profiles.  See macos/README.txt.
 #
 
@@ -11,7 +11,7 @@ set -e
 set -x
 
 if ! [ -f LICENSE ] || ! [ -d llarp ]; then
-    echo "You need to run this as ./contrib/mac.sh from the top-level lokinet project directory" >&2
+    echo "You need to run this as ./contrib/mac.sh from the top-level Session Router project directory" >&2
     exit 1
 fi
 

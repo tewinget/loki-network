@@ -30,12 +30,12 @@ for abi in $build_abis; do
         -DANDROID_STL=c++_static \
         -DCMAKE_TOOLCHAIN_FILE=$NDK/build/cmake/android.toolchain.cmake \
         -DBUILD_STATIC_DEPS=ON \
-        -DLOKINET_PACKAGE=ON \
+        -DSROUTER_PACKAGE=ON \
         -DBUILD_SHARED_LIBS=OFF \
         -DBUILD_TESTING=OFF \
-        -DLOKINET_TESTS=OFF \
-        -DLOKINET_BOOTSTRAP=OFF \
-        -DLOKINET_NATIVE_BUILD=OFF \
+        -DSROUTER_TESTS=OFF \
+        -DSROUTER_BOOTSTRAP=OFF \
+        -DSROUTER_NATIVE_BUILD=OFF \
         -DSTATIC_LINK=ON \
         -DWITH_SYSTEMD=OFF \
         -DFORCE_OXENMQ_SUBMODULE=ON \
@@ -55,8 +55,8 @@ echo "all: $build_abis" >> $build/Makefile
 for abi in $build_abis; do
     echo -ne "$abi:\n\t" >> $build/Makefile
     echo -ne '$(MAKE) -C ' >> $build/Makefile
-    echo "build-$abi lokinet-android" >> $build/Makefile
-    echo -ne "\tmkdir -p out/$abi && cp build-$abi/jni/liblokinet-android.so out/$abi/liblokinet-android.so\n\n" >> $build/Makefile
+    echo "build-$abi session-router-android" >> $build/Makefile
+    echo -ne "\tmkdir -p out/$abi && cp build-$abi/jni/libsession-router-android.so out/$abi/libsession-router-android.so\n\n" >> $build/Makefile
     echo -ne "clean-$abi:\n\t" >> $build/Makefile
     echo -ne '$(MAKE) -C ' >> $build/Makefile
     echo "build-$abi clean" >> $build/Makefile

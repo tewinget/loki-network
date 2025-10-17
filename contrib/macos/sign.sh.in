@@ -10,7 +10,7 @@ fi
 signit() {
     target="$1"
     entitlements="$2"
-    echo -e "\n\e[33;1mSigning ${target/*\/Lokinet.app/Lokinet.app}...\e[0m" >&2
+    echo -e "\n\e[33;1mSigning ${target/*\/SessionRouter.app/SessionRouter.app}...\e[0m" >&2
     codesign \
         --verbose=4 \
         --force \
@@ -23,20 +23,20 @@ signit() {
 }
 
 gui_entitlements="@PROJECT_SOURCE_DIR@/gui/node_modules/app-builder-lib/templates/entitlements.mac.plist"
-ext_entitlements="@PROJECT_SOURCE_DIR@/contrib/macos/lokinet-extension.@LOKINET_ENTITLEMENTS_TYPE@.entitlements.plist"
-app_entitlements="@PROJECT_SOURCE_DIR@/contrib/macos/lokinet.@LOKINET_ENTITLEMENTS_TYPE@.entitlements.plist"
+ext_entitlements="@PROJECT_SOURCE_DIR@/contrib/macos/session-router-extension.@SROUTER_ENTITLEMENTS_TYPE@.entitlements.plist"
+app_entitlements="@PROJECT_SOURCE_DIR@/contrib/macos/session_router.@SROUTER_ENTITLEMENTS_TYPE@.entitlements.plist"
 
-SIGN_TARGET="@PROJECT_BINARY_DIR@/Lokinet @PROJECT_VERSION@/Lokinet.app"
+SIGN_TARGET="@PROJECT_BINARY_DIR@/Session Router @PROJECT_VERSION@/Session_Router.app"
 
 for ext in systemextension appex; do
-    netext="$SIGN_TARGET/@lokinet_ext_dir@/org.lokinet.network-extension.$ext"
+    netext="$SIGN_TARGET/@session_router_ext_dir@/org.session.network-extension.$ext"
     if [ -e "$netext" ]; then
         signit "$netext" "$ext_entitlements"
     fi
 done
 
-if [ "@LOKINET_GUI@" == "ON" ]; then
-    gui_app="$SIGN_TARGET"/Contents/Helpers/Lokinet-GUI.app
+if [ "@SROUTER_GUI@" == "ON" ]; then
+    gui_app="$SIGN_TARGET"/Contents/Helpers/Session-Router-GUI.app
     gui_sign_targets=()
     for bundle in \
         "$gui_app"/Contents/Frameworks/*.framework \
@@ -66,7 +66,7 @@ if [ "@LOKINET_GUI@" == "ON" ]; then
         signit "$target" "$gui_entitlements"
     done
 
-    signit "$SIGN_TARGET"/Contents/MacOS/Lokinet "$app_entitlements"
+    signit "$SIGN_TARGET"/Contents/MacOS/Session Router "$app_entitlements"
 fi
 
 signit "$SIGN_TARGET" "$app_entitlements"

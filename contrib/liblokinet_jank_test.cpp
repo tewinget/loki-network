@@ -1,4 +1,4 @@
-#include <lokinet.hpp>
+#include <session_router.hpp>
 
 #include <exception>
 #include <filesystem>
@@ -18,11 +18,11 @@ int main(int argc, char** argv)
 
     std::string target{argv[1]};
 
-    lokinet::Lokinet loki{std::filesystem::path{"lokinet.ini"}};
+    lokinet::Session Router loki{std::filesystem::path{"session_router.ini"}};
 
     std::promise<void> prom;
     loki.on_connected([&] {
-        std::cout << "\n\x1b[32;1mLokinet connected!\x1b[0m\n\n\x1b[33;1mINITIATING SESSION TO " << target
+        std::cout << "\n\x1b[32;1mSession Router connected!\x1b[0m\n\n\x1b[33;1mINITIATING SESSION TO " << target
                   << "\x1b[0m\n\n"
                   << std::flush;
         loki.establish_udp(

@@ -17,7 +17,7 @@ parser.add_option("--distro", type="string", default="",
                        "e.g. debian-sid/amd64")
 (options, args) = parser.parse_args()
 
-registry_base = 'registry.oxen.rocks/lokinet-ci-'
+registry_base = 'registry.oxen.rocks/session-router-ci-'
 
 distros = [*(('debian', x) for x in ('sid', 'stable', 'testing', 'bullseye', 'buster')),
            *(('ubuntu', x) for x in ('rolling', 'lts', 'impish', 'hirsute', 'focal', 'bionic'))]

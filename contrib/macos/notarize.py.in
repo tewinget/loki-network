@@ -11,7 +11,7 @@ def bold_red(x):
     return "\x1b[31;1m" + x + "\x1b[0m"
 
 if not @notarize_py_is_sysext@:
-    print(bold_red("\nUnable to notarize: this lokinet is not built as a system extension\n"), file=sys.stderr)
+    print(bold_red("\nUnable to notarize: this Session Router is not built as a system extension\n"), file=sys.stderr)
     sys.exit(1)
 
 if not all(("@MACOS_NOTARIZE_USER@", "@MACOS_NOTARIZE_PASS@", "@MACOS_NOTARIZE_ASC@")):
@@ -23,8 +23,8 @@ if not all(("@MACOS_NOTARIZE_USER@", "@MACOS_NOTARIZE_PASS@", "@MACOS_NOTARIZE_A
     sys.exit(1)
 
 os.chdir("@PROJECT_BINARY_DIR@")
-app = "@lokinet_app@"
-zipfile = f"Lokinet.app.notarize.zip"
+app = "@session_router_app@"
+zipfile = f"Session_Router.app.notarize.zip"
 print(f"Creating {zipfile} from {app}")
 if os.path.exists(zipfile):
     os.remove(zipfile)
@@ -37,7 +37,7 @@ started = time.time()
 command = [
     'xcrun', 'altool',
     '--notarize-app',
-    '--primary-bundle-id', 'org.lokinet.@PROJECT_VERSION@',
+    '--primary-bundle-id', 'org.session.@PROJECT_VERSION@',
     *userpass,
     '--asc-provider', "@MACOS_NOTARIZE_ASC@",
     '--file', zipfile,

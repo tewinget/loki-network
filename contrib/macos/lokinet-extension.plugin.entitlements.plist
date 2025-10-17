@@ -3,7 +3,7 @@
 <plist version="1.0">
 	<dict>
 		<key>com.apple.application-identifier</key>
-		<string>SUQ8J2PCT7.org.lokinet.network-extension</string>
+		<string>SUQ8J2PCT7.org.session.network-extension</string>
 
 		<key>com.apple.developer.networking.networkextension</key>
 		<array>

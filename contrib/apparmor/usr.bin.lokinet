@@ -12,7 +12,7 @@ profile lokinet /usr/bin/lokinet {
   network inet6 dgram,
   network netlink raw,
 
-  /etc/loki/lokinet.ini r,
+  /etc/loki/session_router.ini r,
   /dev/net/tun rw,
   /usr/bin/lokinet mr,
 
@@ -21,7 +21,7 @@ profile lokinet /usr/bin/lokinet {
   owner ${HOME}/.lokinet/ rw,
   owner ${HOME}/.lokinet/** rwk,
   owner @{PROC}/@{pid}/task/@{pid}/comm rw,
-  owner /tmp/lokinet.*/{**,} rw,
+  owner /tmp/session_router.*/{**,} rw,
 
-  #include if exists <local/usr.bin.lokinet>
+  #include if exists <local/usr.bin.session_router>
 }

@@ -36,24 +36,24 @@ class LNContext(ctypes.Structure):
 
 class Context:
     """
-    wrapper around liblokinet
+    wrapper around libsessionrouter
     """
 
     def __init__(self, debug=False):
-        self._ln = ctypes.CDLL(find_library("lokinet"))
+        self._ln = ctypes.CDLL(find_library("session-router"))
         self._c = ctypes.CDLL(find_library("c"))
-        self._ln.lokinet_context_new.restype = ctypes.POINTER(LNContext)
-        self._ln.lokinet_address.restype = ctypes.c_char_p
-        self._ln.lokinet_address.argtypes = (ctypes.POINTER(LNContext), )
-        self._ln.lokinet_outbound_stream.restype = ctypes.POINTER(ResultStruct)
-        self._ln.lokinet_outbound_stream.argtypes = (ctypes.POINTER(ResultStruct), ctypes.c_char_p, ctypes.c_char_p, ctypes.POINTER(LNContext))
-        self._ctx = self._ln.lokinet_context_new()
+        self._ln.session_router_context_new.restype = ctypes.POINTER(LNContext)
+        self._ln.session_router_address.restype = ctypes.c_char_p
+        self._ln.session_router_address.argtypes = (ctypes.POINTER(LNContext), )
+        self._ln.session_router_outbound_stream.restype = ctypes.POINTER(ResultStruct)
+        self._ln.session_router_outbound_stream.argtypes = (ctypes.POINTER(ResultStruct), ctypes.c_char_p, ctypes.c_char_p, ctypes.POINTER(LNContext))
+        self._ctx = self._ln.session_router_context_new()
         self._addrmap = dict()
         self._debug = debug
         lvl = 'none'
         if self._debug:
             lvl = 'debug'
-        self._ln.lokinet_log_level(ctypes.create_string_buffer(lvl.encode('ascii')))
+        self._ln.session_router_log_level(ctypes.create_string_buffer(lvl.encode('ascii')))
 
 
     def free(self, ptr):
@@ -62,19 +62,19 @@ class Context:
     def add_bootstrap(self, data):
         ptr = ctypes.create_string_buffer(data)
         ptrlen = ctypes.c_size_t(len(data))
-        return self.ln_call("lokinet_add_bootstrap_rc", ptr, ptrlen)
+        return self.ln_call("session_router_add_bootstrap_rc", ptr, ptrlen)
 
     def wait_for_ready(self, ms):
-        return self.ln_call("lokinet_wait_for_ready", ms) == 0
+        return self.ln_call("session_router_wait_for_ready", ms) == 0
 
     def ready(self):
-        return self.ln_call("lokinet_status") == 0
+        return self.ln_call("session_router_status") == 0
 
     def addr(self):
-        return self._ln.lokinet_address(self._ctx).decode('ascii')
+        return self._ln.session_router_address(self._ctx).decode('ascii')
 
     def expose(self, port):
-        return self.ln_call('lokinet_inbound_stream', port)
+        return self.ln_call('session_router_inbound_stream', port)
 
     def ln_call(self, funcname, *args):
         args += (self._ctx,)
@@ -85,13 +85,13 @@ class Context:
     def expose(self, port):
         port = int(port)
         print("exposing loopback port: {}".format(port))
-        return self.ln_call("lokinet_inbound_stream", port)
+        return self.ln_call("session_router_inbound_stream", port)
 
     def start(self):
-        return self.ln_call("lokinet_context_start")
+        return self.ln_call("session_router_context_start")
 
     def stop(self):
-        self.ln_call("lokinet_context_stop")
+        self.ln_call("session_router_context_stop")
 
     def hasAddr(self, addr):
         return addr in self._addrmap
@@ -109,10 +109,10 @@ class Context:
 
     def __del__(self):
         self.stop()
-        self._ln_call("lokinet_context_free")
+        self._ln_call("session_router_context_free")
 
     def set_netid(self, netid):
-        self._ln.lokinet_set_netid(ctypes.create_string_buffer(netid.encode('ascii')))
+        self._ln.session_router_set_netid(ctypes.create_string_buffer(netid.encode('ascii')))
 
 class Stream:
 
@@ -122,7 +122,7 @@ class Stream:
 
     def connect(self, remote):
         result = ResultStruct()
-        self._ctx.ln_call("lokinet_outbound_stream", ctypes.cast(ctypes.addressof(result), ctypes.POINTER(ResultStruct)), ctypes.create_string_buffer(remote.encode()), ctypes.c_char_p(0))
+        self._ctx.ln_call("session_router_outbound_stream", ctypes.cast(ctypes.addressof(result), ctypes.POINTER(ResultStruct)), ctypes.create_string_buffer(remote.encode()), ctypes.c_char_p(0))
 
         if result.err:
             print(result.err)
@@ -136,7 +136,7 @@ class Stream:
 
     def close(self):
         if self._id is not None:
-            self._ctx.ln_call("lokinet_close_stream", self._id)
+            self._ctx.ln_call("session_router_close_stream", self._id)
 
 def read_and_forward_or_close(readfd, writefd):
     read = 0
@@ -214,7 +214,7 @@ ap.add_argument("--bootstrap", type=str, help="bootstrap file", default="bootstr
 ap.add_argument("--netid", type=str, help="override network id")
 ap.add_argument("--debug", action="store_const", const=True, default=False, help="enable verose logging")
 if bootstrapFromURL:
-    ap.add_argument("--bootstrap-url", type=str, help="bootstrap from remote url", default="https://seed.lokinet.org/lokinet.signed")
+    ap.add_argument("--bootstrap-url", type=str, help="bootstrap from remote url", default="https://seed.getsession.org/session_router.signed")
 
 args = ap.parse_args()
 addr = (args.ip, args.port)
@@ -249,7 +249,7 @@ id = None
 
 try:
     while not ctx.wait_for_ready(500):
-        print("waiting for lokinet...")
+        print("waiting for session_router...")
     lokiaddr = ctx.addr()
     print("we are {}".format(lokiaddr))
     if args.expose:
@@ -259,5 +259,5 @@ try:
     server.serve_forever()
 finally:
     if id is not None:
-        ctx.ln_call("lokinet_close_stream", id)
+        ctx.ln_call("session_router_close_stream", id)
     ctx.stop()

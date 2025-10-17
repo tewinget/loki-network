@@ -45,15 +45,15 @@ for arch in $archs ; do
         -DSTATIC_LINK=ON \
         -DBUILD_SHARED_LIBS=OFF \
         -DBUILD_TESTING=OFF \
-        -DBUILD_LIBLOKINET=OFF \
-        -DLOKINET_TESTS=OFF \
-        -DLOKINET_NATIVE_BUILD=OFF \
+        -DBUILD_LIBSROUTER=OFF \
+        -DSROUTER_TESTS=OFF \
+        -DSROUTER_NATIVE_BUILD=OFF \
         -DSTATIC_LINK=ON \
         -DWITH_SYSTEMD=OFF \
         -DFORCE_OXENMQ_SUBMODULE=ON \
         -DSUBMODULE_CHECK=OFF \
         -DWITH_LTO=OFF \
-        -DLOKINET_BOOTSTRAP=OFF \
+        -DSROUTER_BOOTSTRAP=OFF \
         -DCMAKE_BUILD_TYPE=RelWithDeb \
         "${cmake_extra[@]}" \
         $root

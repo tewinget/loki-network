@@ -7,7 +7,7 @@ import time
 import threading
 import os
 
-lib_file = os.path.join(os.path.realpath('.'), 'liblokinet.so')
+lib_file = os.path.join(os.path.realpath('.'), 'libsessionrouter.so')
 
 class LokiNET(threading.Thread):
 
@@ -53,7 +53,7 @@ def main():
         if loki.configure():
             loki.start()
         else:
-            print("failed to configure lokinet context")
+            print("failed to configure Session Router context")
         try:
             while True:
                 time.sleep(1)

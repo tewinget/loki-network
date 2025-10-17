@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Script used with Drone CI to check that a statically build lokinet only links against the expected
+# Script used with Drone CI to check that a statically build Session Router only links against the expected
 # base system libraries.  Expects to be run with pwd of the project directory with a build in
 # `build` or $1 (if given).
 
@@ -10,7 +10,7 @@ build=${1:-build}
 
 bad=
 if [ "$DRONE_STAGE_OS" == "darwin" ]; then
-    if otool -L ${build}/llarp/apple/org.lokinet.network-extension.systemextension/Contents/MacOS/org.lokinet.network-extension | \
+    if otool -L ${build}/llarp/apple/org.session.network-extension.systemextension/Contents/MacOS/org.session.network-extension | \
         grep -Ev '^llarp/apple:|^\t(/usr/lib/lib(System\.|c\+\+|objc))|/System/Library/Frameworks/(CoreFoundation|NetworkExtension|Foundation|Network)\.framework'; then
         bad=1
     fi
@@ -24,7 +24,7 @@ else
 fi
 
 if [ -n "$bad" ]; then
-    echo -e "\n\n\n\n\e[31;1mlokinet links to unexpected libraries\e[0m\n\n\n"
+    echo -e "\n\n\n\n\e[31;1mSession Router links to unexpected libraries\e[0m\n\n\n"
     exit 1
 fi
 

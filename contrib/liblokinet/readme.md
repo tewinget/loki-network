@@ -1,10 +1,10 @@
-# liblokinet examples
+# libsessionrouter examples
 
 building:
 
     $ mkdir -p build
     $ cd build
-    $ cp /path/to/liblokinet.so .
+    $ cp /path/to/libsessionrouter.so .
     $ cmake .. -DCMAKE_EXE_LINKER_FLAGS='-L.'
     $ make
 

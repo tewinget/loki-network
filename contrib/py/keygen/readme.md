@@ -1,4 +1,4 @@
-# lokinet key generator
+# Session Router key generator
 
 requires:
 
