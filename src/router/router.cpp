@@ -482,7 +482,20 @@ namespace srouter
             assert(net());
 
             if (!netconf._if_name)
-                netconf._if_name = net()->find_free_tun();
+            {
+                std::string suggest;
+#ifdef __linux__
+                if (is_service_node)
+                {
+                    // Use a name based on the hex pubkey prefix, for linux relays, which makes them
+                    // easier to identify and associate with service ndoes when multiple are running.
+                    const auto& rid = id();
+                    suggest = "sr-tun@{}"_format(oxenc::to_hex(rid.data(), rid.data() + 4));
+                }
+#endif
+
+                netconf._if_name = net()->find_free_tun(suggest);
+            }
 
             if (!(netconf._local_ip_net && netconf._local_ip_net->ip.addr))
             {
