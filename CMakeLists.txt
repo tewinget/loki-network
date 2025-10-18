@@ -46,8 +46,8 @@ endif()
 
 
 project(session-router
-    VERSION 0.10.0
-    DESCRIPTION "session-router - IP packet onion router"
+    VERSION 1.0.0
+    DESCRIPTION "Session Router - IP packet onion router"
     LANGUAGES ${LANGS})
 
 if(APPLE)
