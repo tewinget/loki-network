@@ -390,8 +390,23 @@ namespace srouter
             if (!_config.links.listen_addr)
             {
                 if (_public_address)
-                    // No listen address, but a public ip/port were given so use that
-                    _listen_address = *_public_address;
+                {
+                    // No listen address, but a public ip/port were given
+                    // if that public addr is on an interface on the system, use it
+                    // if not, and any other public addr is on an interface, error
+                    // else listen on the `any` address
+                    if (_public_address->is_ipv4() && net()->has_interface_address(_public_address->to_ipv4()))
+                        _listen_address = *_public_address;
+                    else if (_public_address->is_ipv6() && net()->has_interface_address(_public_address->to_ipv6()))
+                        _listen_address = *_public_address;
+                    else if (net()->get_best_public_address(true, _public_address->port()))
+                        throw std::runtime_error{
+                            "Invalid public/listen address combination.  Public address not on the system was "
+                            "specified, listen address was not specified, and there is a public address on the system. "
+                            " Check that [router]:public-ip is set correctly."};
+                    else
+                        _listen_address = quic::Address{"0.0.0.0", _public_address->port()};
+                }
                 else
                     auto_detect = true;
             }
