@@ -454,7 +454,7 @@ namespace srouter
             assignment_acceptor(auth_endpoint),
             Comment{
                 "OMQ endpoint to talk to for authenticating new sessions",
-                "ipc:///var/lib/Session Router/auth.socket",
+                "ipc:///var/lib/session-router/auth.socket",
                 "tcp://127.0.0.1:5555",
             });
 
@@ -462,10 +462,10 @@ namespace srouter
             "network",
             "omq-auth-method",
             FullClientOnly,
-            Default{"llarp.auth"},
+            Default{"session-router.auth"},
             Comment{
                 "OMQ function to call for authenticating new sessions",
-                "llarp.auth",
+                "session-router.auth",
             },
             [this](std::string arg) {
                 if (arg.empty())
@@ -721,7 +721,7 @@ namespace srouter
                 "    srv=_service._protocol priority weight port target.loki",
                 "and can be specified multiple times as needed.",
                 "For more info see",
-                "https://docs.oxen.io/products-built-on-oxen/Session Router/snapps/hosting-snapps",
+                "https://docs.oxen.io/products-built-on-oxen/session-router/snapps/hosting-snapps",
                 "and general description of DNS SRV record configuration.",
             },
             [this](std::string arg) {
