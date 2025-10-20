@@ -1233,7 +1233,7 @@ namespace srouter
             "oxend",
             "rpc",
             RelayOnly,
-            Required,
+            Default{"ipc:///var/lib/oxen/oxend.sock"},
             Comment{
                 "oxenmq control address for for communicating with oxend. Depends on oxend's",
                 "lmq-local-control configuration option. By default this value should be",
